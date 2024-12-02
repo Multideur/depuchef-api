@@ -1,0 +1,119 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Recipe",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "The title of the recipe"
+    },
+    "description": {
+      "type": "string",
+      "description": "A short description of the recipe"
+    },
+    "prepTime": {
+      "type": "string",
+      "description": "The preparation time for the recipe"
+    },
+    "cookTime": {
+      "type": "string",
+      "description": "The cooking time for the recipe"
+    },
+    "totalTime": {
+      "type": "string",
+      "description": "The total time required for the recipe"
+    },
+    "servings": {
+      "type": "integer",
+      "description": "The number of servings the recipe makes"
+    },
+    "ingredients": {
+      "type": "array",
+      "description": "A list of ingredient categories",
+      "items": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string",
+            "description": "The category of ingredients"
+          },
+          "items": {
+            "type": "array",
+            "description": "A list of ingredients in this category",
+            "items": {
+              "type": "string",
+              "description": "An ingredient"
+            }
+          }
+        },
+        "required": [ "category", "items" ]
+      }
+    },
+    "instructions": {
+      "type": "array",
+      "description": "A list of steps to follow for the recipe",
+      "items": {
+        "type": "object",
+        "properties": {
+          "step": {
+            "type": "integer",
+            "description": "The step number"
+          },
+          "description": {
+            "type": "string",
+            "description": "The description of the step"
+          }
+        },
+        "required": [ "step", "description" ]
+      }
+    },
+    "notes": {
+      "type": "array",
+      "description": "Additional notes about the recipe",
+      "items": {
+        "type": "string",
+        "description": "A note"
+      }
+    },
+    "confidence": {
+      "type": "number",
+      "description": "The confidence level of the recipe result",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "error": {
+      "type": "object",
+      "description": "Information about an error that occurred",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "description": "An error code representing the type of error"
+        },
+        "message": {
+          "type": "string",
+          "description": "A description of the error"
+        }
+      },
+      "required": [ "message" ]
+    }
+  },
+  "oneOf": [
+    {
+      "required": [
+        "title",
+        "description",
+        "prepTime",
+        "cookTime",
+        "totalTime",
+        "servings",
+        "ingredients",
+        "instructions",
+        "notes",
+        "confidence"
+      ]
+    },
+    {
+      "required": [ "error" ]
+    }
+  ]
+}
