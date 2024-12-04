@@ -38,14 +38,13 @@ jobs:
     # - name: Run tests
     #   run: dotnet test --no-build --verbosity normal
     
-    - name: List directory contents
-      run: ls -R
     # Publish the project (only runs if tests pass)
     - name: Publish the project
       # if: success()  # Only run if previous steps were successful
       run: dotnet publish DepuChef.Api/DepuChef.Api.csproj -c Release -o publish_output --no-build
-      # working-directory: ${{ github.workspace }}
 
+    - name: List directory contents
+      run: ls -R
     # Login to Azure using service principal
     - name: Azure Login
       uses: azure/login@v1
