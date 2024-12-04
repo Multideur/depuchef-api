@@ -1,0 +1,54 @@
+name: Deploy .NET Web API to Azure Web App
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Checkout the code from GitHub repository
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    # Setup .NET
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0' # Adjust according to your project�s framework
+
+    # Restore dependencies
+    - name: Restore dependencies
+      run: dotnet restore
+
+    # Build the project
+    - name: Build the project
+      run: dotnet build --configuration Release --no-restore
+
+    # Run tests
+    - name: Run tests
+      run: dotnet test --no-build --verbosity normal
+    
+    # Publish the project (only runs if tests pass)
+    - name: Publish the project
+      if: success()  # Only run if previous steps were successful
+      run: dotnet publish -c Release -o publish_output --no-build
+
+    # Login to Azure using service principal
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    # Deploy to Azure Web App using Azure CLI
+    - name: Deploy to Azure Web App
+      if: success()
+      run: |
+        az webapp deploy --name ${{ vars.AZURE_WEBAPP_NAME }} \
+          --resource-group ${{ vars.AZURE_RESOURCE_GROUP }} \
+          --src-path ./publish_output \
+          --type zip
