@@ -43,11 +43,6 @@ jobs:
       # if: success()  # Only run if previous steps were successful
       run: dotnet publish DepuChef.Api/DepuChef.Api.csproj -c Release -o publish_output --no-build
 
-    # Install Azure CLI
-    - name: Install Azure CLI
-      run: |
-        curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-
     # Login to Azure using service principal
     - name: Azure Login
       uses: azure/login@v1
@@ -58,7 +53,8 @@ jobs:
     - name: Deploy to Azure Web App
       if: success()
       run: |
-        az webapp deploy --name ${{ vars.AZURE_WEBAPP_NAME }} \
-          --resource-group ${{ vars.AZURE_RESOURCE_GROUP }} \
-          --src-path ./publish_output \
-          --type zip
+        az webapp up --name ${{ vars.AZURE_WEBAPP_NAME }} \
+      --resource-group ${{ vars.AZURE_RESOURCE_GROUP }} \
+      --location ${{ vars.AZURE_LOCATION }} \
+      --src-path ./publish_output \
+      --runtime "DOTNETCORE:8.0"
