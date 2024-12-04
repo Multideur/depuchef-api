@@ -54,7 +54,7 @@ jobs:
       if: success()
       run: |
         az webapp up --name ${{ vars.AZURE_WEBAPP_NAME }} \
-      --resource-group ${{ vars.AZURE_RESOURCE_GROUP }} \
-      --location ${{ vars.AZURE_LOCATION }} \
-      --src-path ./publish_output \
-      --runtime "DOTNETCORE:8.0"
+          --resource-group ${{ vars.AZURE_RESOURCE_GROUP }} \
+          --location ${{ vars.AZURE_LOCATION }} \
+          --src-path ./publish_output \
+          --runtime "DOTNETCORE:8.0" \
