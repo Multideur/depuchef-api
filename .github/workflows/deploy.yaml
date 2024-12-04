@@ -41,7 +41,7 @@ jobs:
     # Publish the project (only runs if tests pass)
     - name: Publish the project
       # if: success()  # Only run if previous steps were successful
-      run: dotnet publish Depuchef.API/DepuChef.Api.csproj -c Release -o publish_output --no-build
+      run: dotnet publish DepuChef.API/DepuChef.Api.csproj -c Release -o publish_output --no-build
 
     # Login to Azure using service principal
     - name: Azure Login
