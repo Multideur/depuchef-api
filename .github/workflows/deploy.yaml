@@ -43,8 +43,8 @@ jobs:
       # if: success()  # Only run if previous steps were successful
       run: dotnet publish DepuChef.Api/DepuChef.Api.csproj -c Release -o publish_output --no-build
 
-    - name: List directory contents
-      run: ls -R
+    - name: List publish_output directory contents
+      run: ls -R publish_output
     # Login to Azure using service principal
     - name: Azure Login
       uses: azure/login@v1
