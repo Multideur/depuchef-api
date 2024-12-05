@@ -49,12 +49,10 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    # Deploy to Azure Web App using Azure CLI
-    - name: Deploy to Azure Web App
-      if: success()
-      run: |
-        az webapp up --name ${{ vars.AZURE_WEBAPP_NAME }} \
-          --resource-group ${{ vars.AZURE_RESOURCE_GROUP }} \
-          --location ${{ vars.AZURE_LOCATION }} \
-          --src-path ./publish_output \
-          --runtime "DOTNETCORE:8.0" \
+    # Deploy to Azure Web apps
+    - name: 'Run Azure webapp deploy action using publish profile credentials'
+      uses: azure/webapps-deploy@v2
+      with: 
+        app-name: ${{ env.AZURE_WEBAPP_NAME }} # Replace with your app name
+        publish-profile: ${{ secrets.AZURE_WEB_PUBLISH_PROFILE  }} # Define secret variable in repository settings as per action documentation
+        package: publish_output
