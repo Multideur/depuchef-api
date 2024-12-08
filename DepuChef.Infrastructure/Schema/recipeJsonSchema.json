@@ -71,7 +71,13 @@
       "type": "array",
       "description": "Additional notes about the recipe",
       "items": {
-        "type": "string",
+        "type": "object",
+        "properties": {
+          "note": {
+            "type": "string",
+            "description": "The note"
+          }
+        },
         "description": "A note"
       }
     },
