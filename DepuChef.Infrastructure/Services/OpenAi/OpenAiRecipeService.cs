@@ -109,8 +109,8 @@ public class OpenAiRecipeService(IFileManager fileManager,
         var messages = await messageManager.GetMessages(threadId, cancellationToken);
         if (messages is null)
         {
-            logger.LogError("Failed to get messages");
-            throw new Exception("Failed to get messages");
+            logger.LogError("Failed to get messages for thread {threadId}.", threadId);
+            throw new Exception($"Failed to get messages for thread {threadId}.");
         }
 
         var recipe = (messages
@@ -119,13 +119,28 @@ public class OpenAiRecipeService(IFileManager fileManager,
             .LastOrDefault(c => c.Type == "text")?
             .Text?
             .Value)
-            ?? throw new Exception("Failed to get recipe");
+            ?? throw new Exception($"Failed to get recipe for thread {threadId}.");
 
         var deserializeRecipe = JsonSerializer.Deserialize<Recipe>(recipe, _jsonSerializerOptions);
+        if (deserializeRecipe?.Title is null)
+        {
+            logger.LogWarning("Could not deserialize the recipe for thread {threadId}.", threadId);
+            var error = JsonSerializer.Deserialize<RecipeError>(recipe, _jsonSerializerOptions);
+            if (error is not null)
+            {
+                logger.LogError("Error on generating recipe for thread {threadId}. Message: {message}",
+                    threadId,
+                    error.Message);
+            }
+            else
+            {
+                logger.LogError("Could not retrieve an error for why recipe ws not generated on thread {threadId}.",
+                    threadId);
+            }
+            return null;
+        }
 
-        return deserializeRecipe is null
-            ? throw new Exception("Failed to deserialize recipe")
-            : deserializeRecipe;
+        return deserializeRecipe;
     }
 
     private static async Task<RunResponse?> PollRunStatus(IThreadManager threadManager,
