@@ -16,21 +16,17 @@ jobs:
     environment: ${{ matrix.environment }}
 
     steps:
-    # Checkout the code from GitHub repository
     - name: Checkout code
       uses: actions/checkout@v4
-
-    # Setup .NET
+      
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: '8.0' # Adjust according to your project�s framework
-
-    # Restore dependencies
+        dotnet-version: '8.0'
+        
     - name: Restore dependencies
       run: dotnet restore
-
-    # Build the project
+      
     - name: Build the project
       run: dotnet build --configuration Release --no-restore
 
@@ -38,21 +34,18 @@ jobs:
     # - name: Run tests
     #   run: dotnet test --no-build --verbosity normal
     
-    # Publish the project (only runs if tests pass)
     - name: Publish the project
       # if: success()  # Only run if previous steps were successful
       run: dotnet publish DepuChef.Api/DepuChef.Api.csproj -c Release -o publish_output --no-build
-
-    # Login to Azure using service principal
+      
     - name: Azure Login
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-    # Deploy to Azure Web apps
-    - name: 'Run Azure webapp deploy action using publish profile credentials'
+    
+    - name: Deploy to Azure Web Apps
       uses: azure/webapps-deploy@v2
       with: 
-        app-name: ${{ env.AZURE_WEBAPP_NAME }} # Replace with your app name
-        publish-profile: ${{ secrets.AZURE_WEB_PUBLISH_PROFILE  }} # Define secret variable in repository settings as per action documentation
+        app-name: ${{ env.AZURE_WEBAPP_NAME }}
+        publish-profile: ${{ secrets.AZURE_WEB_PUBLISH_PROFILE  }}
         package: publish_output
