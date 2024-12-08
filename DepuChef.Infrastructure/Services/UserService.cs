@@ -10,7 +10,7 @@ public class UserService(IUserRepository userRepository) : IUserService
     {
         var user = new User
         {
-            ChefChoice = request.ChefChoice,
+            ChefPreference = request.ChefPreference,
             AuthUserId = request.AuthUserId,
             Email = request.Email,
             FirstName = request.FirstName,

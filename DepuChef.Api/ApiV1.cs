@@ -7,19 +7,18 @@ namespace DepuChef.Api;
 
 public static class ApiV1
 {
-    private const string ApiPrefix = "/api/v1";
     public static void AddEndpoints(this WebApplication app)
     {
-        app.MapPost(ApiPrefix + "/recipe/create", CreateRecipeFromImage)
+        app.MapPost("/recipe/create", CreateRecipeFromImage)
             .DisableAntiforgery()
             .WithName("GenerateRecipe")
             .WithOpenApi();
 
-        app.MapGet(ApiPrefix + "/recipe/{threadId}", GetRecipeFromThread);
+        app.MapGet("/recipe/{threadId}", GetRecipeFromThread);
 
-        app.MapPost(ApiPrefix + "/identity/register", RegisterUser);
+        app.MapPost("/identity/register", RegisterUser);
 
-        app.MapGet(ApiPrefix + "/test", () =>
+        app.MapGet("/test", () =>
         {
             Console.WriteLine("This is a test log. Depuchef");
             return Results.Ok("Hello, World!");

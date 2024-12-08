@@ -11,7 +11,7 @@ public class Recipe
     public int Servings { get; set; }
     public List<Ingredient>? Ingredients { get; set; }
     public List<Instruction>? Instructions { get; set; }
-    public List<string>? Notes { get; set; }
+    public List<Note>? Notes { get; set; }
     public decimal Confidence { get; set; }
-    public decimal? Rating { get; set; }
+    public int? Rating { get; set; }
 }
