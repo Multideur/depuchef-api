@@ -52,10 +52,14 @@ jobs:
     #   uses: azure/login@v1
     #   with:
     #     creds: ${{ secrets.AZURE_CREDENTIALS }}
+    - name: Download artifact from build job
+      uses: actions/download-artifact@v4
+      with:
+        name: depuchef-api
     
     - name: Deploy to Azure Web Apps
       uses: azure/webapps-deploy@v3
       with: 
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
         publish-profile: ${{ secrets.AZURE_WEB_PUBLISH_PROFILE  }}
-        package: publish_output
+        package: .
