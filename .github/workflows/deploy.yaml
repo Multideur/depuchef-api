@@ -30,9 +30,15 @@ jobs:
     #   run: dotnet test --no-build --verbosity normal
     
     - name: Publish the project
-      # if: success()  # Only run if previous steps were successful
+      if: success()
       run: dotnet publish DepuChef.Api/DepuChef.Api.csproj -c Release -o publish_output --no-build
-   
+
+    - name: Upload artifact for deployment job
+      uses: actions/upload-artifact@v4
+      with:
+        name: depuchef-api
+        path: publish_output
+          
   deploy:
     strategy:
       matrix:
