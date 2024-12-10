@@ -48,10 +48,6 @@ jobs:
     needs: build
     environment: ${{ matrix.environment }} 
     steps:
-    # - name: Azure Login
-    #   uses: azure/login@v1
-    #   with:
-    #     creds: ${{ secrets.AZURE_CREDENTIALS }}
     - name: Download artifact from build job
       uses: actions/download-artifact@v4
       with:
