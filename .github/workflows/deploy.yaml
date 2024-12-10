@@ -7,22 +7,17 @@ on:
       - main
 
 jobs:
-  build-and-deploy:
-    strategy:
-      matrix:
-        environment:
-          - development          
+  build:  
     runs-on: ubuntu-latest
-    environment: ${{ matrix.environment }}
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
       
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v3
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '8.0'
+        dotnet-version: '8.x'
         
     - name: Restore dependencies
       run: dotnet restore
@@ -37,14 +32,23 @@ jobs:
     - name: Publish the project
       # if: success()  # Only run if previous steps were successful
       run: dotnet publish DepuChef.Api/DepuChef.Api.csproj -c Release -o publish_output --no-build
-      
-    - name: Azure Login
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
+   
+  deploy:
+    strategy:
+      matrix:
+        environment:
+          - development   
+    runs-on: ubuntu-latest
+    needs: build
+    environment: ${{ matrix.environment }} 
+    steps:
+    # - name: Azure Login
+    #   uses: azure/login@v1
+    #   with:
+    #     creds: ${{ secrets.AZURE_CREDENTIALS }}
     
     - name: Deploy to Azure Web Apps
-      uses: azure/webapps-deploy@v2
+      uses: azure/webapps-deploy@v3
       with: 
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
         publish-profile: ${{ secrets.AZURE_WEB_PUBLISH_PROFILE  }}
