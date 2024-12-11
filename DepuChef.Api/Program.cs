@@ -52,7 +52,8 @@ services.AddCors(options =>
             .AllowCredentials();
     });
 });
-services.AddSignalR();
+services.AddSignalR()
+    .AddAzureSignalR();
 
 var authority = configuration.GetSection("Authentication:Authority").Value;
 services

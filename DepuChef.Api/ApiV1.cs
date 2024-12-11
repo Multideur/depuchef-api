@@ -1,4 +1,5 @@
-﻿using DepuChef.Application.Models;
+﻿using DepuChef.Api.Models;
+using DepuChef.Application.Models;
 using DepuChef.Application.Models.User;
 using DepuChef.Application.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -81,7 +82,34 @@ public static class ApiV1
             return Results.NotFound();
         }
 
-        return Results.Ok(recipe);
+        var recipeResponse = new RecipeResponse
+        {
+            Id = recipe.Id,
+            Title = recipe.Title,
+            Ingredients = recipe.Ingredients.Select(r => new IngredientDto
+            {
+                Category = r.Category,
+                Items = r.Items
+            }).ToList(),
+            Instructions = recipe.Instructions.Select(r => new InstructionDto
+            {
+                Step = r.Step,
+                Description = r.Description
+            }).ToList(),
+            Confidence = recipe.Confidence,
+            CookTime = recipe.CookTime,
+            Description = recipe.Description,
+            Notes = recipe.Notes.Select(r => new NoteDto
+            {
+                Text = r.Text
+            }).ToList(),
+            PrepTime = recipe.PrepTime,
+            Rating = recipe.Rating,
+            Servings = recipe.Servings,
+            TotalTime = recipe.TotalTime
+        };
+
+        return Results.Ok(recipeResponse);
     }
 
     private static async Task<IResult> RegisterUser(
