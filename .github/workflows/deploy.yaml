@@ -46,7 +46,9 @@ jobs:
           - development   
     runs-on: ubuntu-latest
     needs: build
-    environment: ${{ matrix.environment }} 
+    environment: 
+      name: ${{ matrix.environment }} 
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     steps:
     - name: Download artifact from build job
       uses: actions/download-artifact@v4
@@ -54,6 +56,7 @@ jobs:
         name: depuchef-api
     
     - name: Deploy to Azure Web Apps
+      id: deploy-to-webapp
       uses: azure/webapps-deploy@v3
       with: 
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
