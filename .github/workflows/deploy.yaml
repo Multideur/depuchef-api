@@ -56,10 +56,10 @@ jobs:
         name: depuchef-api
 
     - name: Update database
-      working-directory: DepuChef.Api
+      # working-directory: ./DepuChef.Api
       run: |
         dotnet tool install --global dotnet-ef
-        dotnet tool restore
+        # dotnet tool restore
         dotnet ef database update \
           -c DepuChefDbContext \
           -p DepuChef.Infrastructure \
