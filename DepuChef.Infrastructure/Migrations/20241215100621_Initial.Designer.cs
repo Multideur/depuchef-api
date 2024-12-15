@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DepuChef.Infrastructure.Migrations
 {
     [DbContext(typeof(DepuChefDbContext))]
-    [Migration("20241208043339_InitialMigration")]
-    partial class InitialMigration
+    [Migration("20241215100621_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
