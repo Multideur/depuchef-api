@@ -56,10 +56,14 @@ jobs:
         name: depuchef-api
 
     - name: Update database
+      working-directory: DepuChef.Api
       run: |
         dotnet tool install --global dotnet-ef
         dotnet tool restore
-        dotnet ef database update -c DepuChefDbContext -p DepuChef.Api/DepuChef.Infrastructure -s DepuChef.Api/DepuChef.Api
+        dotnet ef database update \
+          -c DepuChefDbContext \
+          -p DepuChef.Infrastructure \
+          -s DepuChef.Api
     
     - name: Deploy to Azure Web Apps
       id: deploy-to-webapp
