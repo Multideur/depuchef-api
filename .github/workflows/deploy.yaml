@@ -55,6 +55,15 @@ jobs:
       with:
         name: depuchef-api
 
+    - name: List directory contents
+      run: |
+        echo "Listing contents of the root directory:"
+        ls -al
+        echo "Listing contents of DepuChef.Api:"
+        ls -al DepuChef.Api
+        echo "Listing contents of DepuChef.Infrastructure:"
+        ls -al DepuChef.Infrastructure
+
     - name: Update database
       # working-directory: ./DepuChef.Api
       run: |
