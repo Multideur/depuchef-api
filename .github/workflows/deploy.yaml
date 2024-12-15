@@ -33,6 +33,11 @@ jobs:
       if: success()
       run: dotnet publish DepuChef.Api/DepuChef.Api.csproj -c Release -o publish_output --no-build
 
+    - name: Check publish output
+      run: |
+        echo "Contents of publish_output:"
+        ls -al publish_output
+
     - name: Upload artifact for deployment job
       uses: actions/upload-artifact@v4
       with:
