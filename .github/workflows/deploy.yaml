@@ -76,8 +76,8 @@ jobs:
         # dotnet tool restore
         dotnet ef database update \
           -c DepuChefDbContext \
-          -p DepuChef.Infrastructure/DepuChef.Infrastructure.csproj \
-          -s DepuChef.Api/DepuChef.Api.csproj
+          -p publish_output/DepuChef.Infrastructure \
+          -s publish_output/DepuChef.Api
     
     - name: Deploy to Azure Web Apps
       id: deploy-to-webapp
