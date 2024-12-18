@@ -77,3 +77,5 @@ jobs:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
         publish-profile: ${{ secrets.AZURE_WEB_PUBLISH_PROFILE  }}
         package: .
+      env:
+        ASPNETCORE_ENVIRONMENT: ${{ matrix.environment | title }}
