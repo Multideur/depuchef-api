@@ -11,19 +11,22 @@ public static class ApiV1
     public static void AddEndpoints(this WebApplication app)
     {
         app.MapPost("/recipe/create", CreateRecipeFromImage)
+            .RequireAuthorization()
             .DisableAntiforgery()
             .WithName("GenerateRecipe")
             .WithOpenApi();
 
-        app.MapGet("/recipe/{threadId}", GetRecipeFromThread);
+        app.MapGet("/recipe/{threadId}", GetRecipeFromThread)
+            .RequireAuthorization();
 
-        app.MapPost("/identity/register", RegisterUser);
+        app.MapPost("/identity/register", RegisterUser)
+            .RequireAuthorization();
 
         app.MapGet("/test", () =>
         {
             Console.WriteLine("This is a test log. Depuchef");
             return Results.Ok("Hello, World!");
-        });
+        }).RequireAuthorization();
     }
 
     private static async Task<IResult> CreateRecipeFromImage(

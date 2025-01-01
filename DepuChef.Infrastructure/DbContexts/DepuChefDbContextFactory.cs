@@ -9,7 +9,7 @@ public class DepuChefDbContextFactory : IDesignTimeDbContextFactory<DepuChefDbCo
     {
         var optionsBuilder = new DbContextOptionsBuilder<DepuChefDbContext>();
 
-        optionsBuilder.UseSqlServer("Server=db;Database=MyAppDb;User=sa;Password=MyPassword1");
+        optionsBuilder.UseSqlServer("***REMOVED***");
 
         return new DepuChefDbContext(optionsBuilder.Options);
     }
