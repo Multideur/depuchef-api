@@ -12,13 +12,13 @@ public static class ApiV1
     public static void AddEndpoints(this WebApplication app)
     {
         app.MapPost("/recipe/create", CreateRecipeFromImage)
-            //.RequireAuthorization()
+            .RequireAuthorization()
             .DisableAntiforgery()
             .WithName("GenerateRecipe")
             .WithOpenApi();
 
-        app.MapGet("/recipe/{threadId}", GetRecipeFromThread);
-            //.RequireAuthorization();
+        app.MapGet("/recipe/{threadId}", GetRecipeFromThread)
+            .RequireAuthorization();
 
         app.MapPost("/identity/register", RegisterUser)
             .RequireAuthorization();
