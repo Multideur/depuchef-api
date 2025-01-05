@@ -10,6 +10,7 @@ using DepuChef.Infrastructure.Hubs;
 using DepuChef.Infrastructure.Services;
 using DepuChef.Infrastructure.Services.OpenAi;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.OpenApi.Models;
 using System.Threading.Channels;
 
@@ -30,6 +31,8 @@ services.AddScoped<IUserService, UserService>();
 services.AddScoped<IHttpService, HttpService>();
 services.AddScoped<IClientNotifier, ClientNotifier>();
 services.AddScoped<IJsonFileReader, JsonFileReader>();
+services.AddScoped<IClaimsHelper, ClaimsHelper>();
+services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 services.AddSingleton(Channel.CreateUnbounded<BackgroundRecipeRequest>());
 services.AddSingleton<IRecipeRequestBackgroundService>(provider =>
 {

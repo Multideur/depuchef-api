@@ -3,6 +3,7 @@ using DepuChef.Application.Models.OpenAI;
 using DepuChef.Application.Models.OpenAI.CleanUp;
 using DepuChef.Application.Models.OpenAI.File;
 using DepuChef.Application.Models.OpenAI.Thread;
+using DepuChef.Application.Repositories;
 using DepuChef.Application.Services;
 using DepuChef.Application.Services.OpenAi;
 using DepuChef.Infrastructure.Services.OpenAi;
@@ -21,6 +22,7 @@ public class OpenAiRecipeServiceTests
     private readonly Mock<IMessageManager> _mockMessageManager = new();
     private readonly Mock<ICleanUpService> _mockCleanUpService = new();
     private readonly Mock<IClientNotifier> _mockClientNotifier = new();
+    private readonly Mock<IProcessRepository> _mockProcessRepository = new();
     private readonly Mock<IOptions<OpenAiOptions>> _mockOptions = new();
     private readonly Mock<ILogger<OpenAiRecipeService>> _mockLogger = new();
 
@@ -159,6 +161,7 @@ public class OpenAiRecipeServiceTests
             _mockMessageManager.Object,
             _mockCleanUpService.Object,
             _mockClientNotifier.Object,
+            _mockProcessRepository.Object,
             _mockOptions.Object,
             _mockLogger.Object
             );

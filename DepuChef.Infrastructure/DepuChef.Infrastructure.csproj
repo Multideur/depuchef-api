@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="Repositories\UserRepositoryBkup.cs" />
+    <None Include="Repositories\UserRepository.cs" />
   </ItemGroup>
 
   <ItemGroup>

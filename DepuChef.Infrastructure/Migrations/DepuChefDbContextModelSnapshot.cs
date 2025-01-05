@@ -31,9 +31,6 @@ namespace DepuChef.Infrastructure.Migrations
                     b.Property<string>("Category")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Items")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<Guid>("RecipeId")
                         .HasColumnType("uniqueidentifier");
 
@@ -41,7 +38,27 @@ namespace DepuChef.Infrastructure.Migrations
 
                     b.HasIndex("RecipeId");
 
-                    b.ToTable("Ingredients");
+                    b.ToTable("Ingredient");
+                });
+
+            modelBuilder.Entity("DepuChef.Application.Models.IngredientItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("IngredientId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IngredientId");
+
+                    b.ToTable("IngredientItem");
                 });
 
             modelBuilder.Entity("DepuChef.Application.Models.Instruction", b =>
@@ -99,6 +116,11 @@ namespace DepuChef.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("(GETUTCDATE())");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -121,9 +143,43 @@ namespace DepuChef.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("(GETUTCDATE())");
+
                     b.HasKey("Id");
 
-                    b.ToTable("Recipes");
+                    b.ToTable("Recipe");
+                });
+
+            modelBuilder.Entity("DepuChef.Application.Models.RecipeProcess", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("(GETUTCDATE())");
+
+                    b.Property<string>("FileId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ThreadId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("(GETUTCDATE())");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("RecipeProcesses");
                 });
 
             modelBuilder.Entity("DepuChef.Application.Models.User.User", b =>
@@ -138,6 +194,11 @@ namespace DepuChef.Infrastructure.Migrations
                     b.Property<int?>("ChefPreference")
                         .HasColumnType("int");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("(GETUTCDATE())");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -151,6 +212,11 @@ namespace DepuChef.Infrastructure.Migrations
                     b.Property<int?>("SubscriptionLevel")
                         .HasColumnType("int");
 
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("(GETUTCDATE())");
+
                     b.HasKey("Id");
 
                     b.ToTable("Users");
@@ -161,6 +227,15 @@ namespace DepuChef.Infrastructure.Migrations
                     b.HasOne("DepuChef.Application.Models.Recipe", null)
                         .WithMany("Ingredients")
                         .HasForeignKey("RecipeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("DepuChef.Application.Models.IngredientItem", b =>
+                {
+                    b.HasOne("DepuChef.Application.Models.Ingredient", null)
+                        .WithMany("Items")
+                        .HasForeignKey("IngredientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -179,6 +254,11 @@ namespace DepuChef.Infrastructure.Migrations
                     b.HasOne("DepuChef.Application.Models.Recipe", null)
                         .WithMany("Notes")
                         .HasForeignKey("RecipeId");
+                });
+
+            modelBuilder.Entity("DepuChef.Application.Models.Ingredient", b =>
+                {
+                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("DepuChef.Application.Models.Recipe", b =>

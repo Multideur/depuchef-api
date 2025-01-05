@@ -1,22 +1,22 @@
 ﻿using DepuChef.Application.Models.User;
 using DepuChef.Application.Repositories;
+using DepuChef.Infrastructure.DbContexts;
+using Microsoft.EntityFrameworkCore;
 
 namespace DepuChef.Infrastructure.Repositories;
 
-public class UserRepository : IUserRepository
+public class UserRepository(DepuChefDbContext databaseContext) : IUserRepository
 {
-    public Task<User?> Add(User user, CancellationToken cancellationToken)
+    public async Task<User?> Add(User user, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var entityEntry = await databaseContext.Users.AddAsync(user, cancellationToken);
+        await databaseContext.SaveChangesAsync(cancellationToken);
+        return entityEntry.Entity;
     }
 
-    public Task<User?> GetUser(string email, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
+    public async Task<User?> GetUser(string email, CancellationToken cancellationToken) => 
+        await databaseContext.Users.SingleOrDefaultAsync(user => user.Email == email, cancellationToken);
 
-    public Task<User?> GetUser(Guid id, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
+    public async Task<User?> GetUser(Guid id, CancellationToken cancellationToken) => 
+        await databaseContext.Users.SingleOrDefaultAsync(user => user.Id == id, cancellationToken);
 }

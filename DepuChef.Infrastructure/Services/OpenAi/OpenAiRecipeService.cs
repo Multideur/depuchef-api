@@ -9,6 +9,7 @@ using DepuChef.Application.Models.OpenAI.Message;
 using DepuChef.Application.Models.OpenAI.CleanUp;
 using DepuChef.Application.Services;
 using DepuChef.Application.Services.OpenAi;
+using DepuChef.Application.Repositories;
 
 namespace DepuChef.Infrastructure.Services.OpenAi;
 
@@ -17,6 +18,7 @@ public class OpenAiRecipeService(IFileManager fileManager,
     IMessageManager messageManager,
     ICleanUpService cleanUpService,
     IClientNotifier clientNotifier,
+    IProcessRepository processRepository,
     IOptions<OpenAiOptions> options,
     ILogger<OpenAiRecipeService> logger) : IRecipeService
 {
@@ -95,7 +97,12 @@ public class OpenAiRecipeService(IFileManager fileManager,
             await clientNotifier.NotifyRecipeReady(recipeRequest.ConnectionId,
                 runResponse.ThreadId,
                 cancellationToken);
-            await CleanUp(fileUploadResponse.Id, runResponse.ThreadId, cancellationToken);
+
+            await processRepository.SaveRecipeProcess(new RecipeProcess
+            {
+                ThreadId = runResponse.ThreadId,
+                FileId = fileUploadResponse.Id
+            }, cancellationToken);
         }
         catch (Exception ex)
         {
@@ -139,6 +146,8 @@ public class OpenAiRecipeService(IFileManager fileManager,
             }
             return null;
         }
+
+        _ = CleanUp(threadId, cancellationToken);
 
         return deserializeRecipe;
     }
@@ -202,13 +211,19 @@ public class OpenAiRecipeService(IFileManager fileManager,
         return fileUploadResponse;
     }
 
-    private async Task CleanUp(string fileId,
-        string threadId,
+    private async Task CleanUp(string threadId,
         CancellationToken cancellationToken)
     {
+        var process = await processRepository.GetRecipeProcessByThreadId(threadId, cancellationToken);
+        if (process is null)
+        {
+            logger.LogWarning("No process found for thread {threadId}.", threadId);
+            return;
+        }
+
         var cleanUpRequest = new CleanUpRequest
         {
-            FileId = fileId,
+            FileId = process.FileId,
             ThreadId = threadId
         };
 

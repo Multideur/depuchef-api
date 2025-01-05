@@ -1,11 +1,10 @@
 ﻿using DepuChef.Application.Constants;
 
-namespace DepuChef.Application.Models.User;
+namespace DepuChef.Api.Models;
 
-public class User : AuditedModel
+public class UserResponse
 {
     public Guid Id { get; set; }
-    public string? AuthUserId { get; set; }
     public string? Email { get; set; }
     public string? FirstName { get; set; }
     public string? LastName { get; set; }

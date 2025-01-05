@@ -1,6 +1,6 @@
 ﻿namespace DepuChef.Application.Models;
 
-public class Recipe
+public class Recipe : AuditedModel
 {
     public Guid Id { get; set; }
     public string? Title { get; set; }

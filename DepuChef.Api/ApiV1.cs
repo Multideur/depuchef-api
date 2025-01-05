@@ -1,4 +1,5 @@
 ﻿using DepuChef.Api.Models;
+using DepuChef.Application.Exceptions;
 using DepuChef.Application.Models;
 using DepuChef.Application.Models.User;
 using DepuChef.Application.Services;
@@ -11,13 +12,13 @@ public static class ApiV1
     public static void AddEndpoints(this WebApplication app)
     {
         app.MapPost("/recipe/create", CreateRecipeFromImage)
-            .RequireAuthorization()
+            //.RequireAuthorization()
             .DisableAntiforgery()
             .WithName("GenerateRecipe")
             .WithOpenApi();
 
-        app.MapGet("/recipe/{threadId}", GetRecipeFromThread)
-            .RequireAuthorization();
+        app.MapGet("/recipe/{threadId}", GetRecipeFromThread);
+            //.RequireAuthorization();
 
         app.MapPost("/identity/register", RegisterUser)
             .RequireAuthorization();
@@ -89,12 +90,12 @@ public static class ApiV1
         {
             Id = recipe.Id,
             Title = recipe.Title,
-            Ingredients = recipe.Ingredients.Select(r => new IngredientDto
+            Ingredients = recipe.Ingredients?.Select(r => new IngredientDto
             {
                 Category = r.Category,
-                Items = r.Items
+                Items = r.Items?.Select(i => i.Name).ToList()
             }).ToList(),
-            Instructions = recipe.Instructions.Select(r => new InstructionDto
+            Instructions = recipe.Instructions?.Select(r => new InstructionDto
             {
                 Step = r.Step,
                 Description = r.Description
@@ -102,7 +103,7 @@ public static class ApiV1
             Confidence = recipe.Confidence,
             CookTime = recipe.CookTime,
             Description = recipe.Description,
-            Notes = recipe.Notes.Select(r => new NoteDto
+            Notes = recipe.Notes?.Select(r => new NoteDto
             {
                 Text = r.Text
             }).ToList(),
@@ -118,14 +119,56 @@ public static class ApiV1
     private static async Task<IResult> RegisterUser(
         [FromBody] RegisterUserRequest registerUserRequest,
         IUserService userService,
+        ILogger<RegisterUserRequest> logger,
         CancellationToken cancellationToken)
     {
-        var result = await userService.RegisterUser(registerUserRequest, cancellationToken);
-        if (result == null)
+        try
         {
-            return Results.BadRequest();
-        }
+            logger.LogInformation("Registering user with email: {email}", registerUserRequest.Email);
+            var result = await userService.RegisterUser(registerUserRequest, cancellationToken);
+            if (result == null)
+            {
+                return Results.BadRequest();
+            }
 
-        return Results.Ok(result);
+            var userResponse = new UserResponse
+            {
+                Id = result.Id,
+                Email = result.Email,
+                FirstName = result.FirstName,
+                LastName = result.LastName,
+                SubscriptionLevel = result.SubscriptionLevel,
+                ChefPreference = result.ChefPreference
+            };
+
+            return Results.Ok(userResponse);
+        }
+        catch (InvalidClaimException ex)
+        {
+            logger.LogError(ex, "Invalid claim exception. Claim type: {claimType}", ex.ClaimType);
+            var problemDetails = new ProblemDetails
+            {
+                Title = "Invalid claim.",
+                Detail = ex.Message
+            };
+
+            return Results.BadRequest(problemDetails);
+        }
+        catch (InvalidOperationException ex)
+        {
+            logger.LogError(ex, "Invalid operation exception.");
+            var problemDetails = new ProblemDetails
+            {
+                Title = "Invalid operation.",
+                Detail = ex.Message
+            };
+
+            return Results.BadRequest(problemDetails);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "An error occurred while registering user.");
+            return Results.StatusCode(500);
+        }
     }
 }

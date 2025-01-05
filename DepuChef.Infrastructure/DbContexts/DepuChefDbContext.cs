@@ -2,14 +2,14 @@
 using DepuChef.Application.Models;
 using DepuChef.Application.Models.User;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace DepuChef.Infrastructure.DbContexts;
 
 public class DepuChefDbContext(DbContextOptions<DepuChefDbContext> options) : DbContext(options)
 {
-    public DbSet<Recipe> Recipes { get; set; } = null!;
-    public DbSet<Ingredient> Ingredients { get; set; } = null!;
     public DbSet<User> Users { get; set; } = null!;
+    public DbSet<RecipeProcess> RecipeProcesses { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -26,6 +26,17 @@ public class DepuChefDbContext(DbContextOptions<DepuChefDbContext> options) : Db
             .HasConversion(
                 choice => choice.Value,
                 choice => ChefChoice.FromValue(choice));
+
+            user.Property(u => u.CreatedAt)
+                        .HasDefaultValueSql("(GETUTCDATE())")
+                        .IsRequired()
+                        .Metadata
+                        .SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
+
+            user.Property(u => u.UpdatedAt)
+            .HasDefaultValueSql("(GETUTCDATE())")
+            .IsRequired();
+
         });
 
         modelBuilder.Entity<Recipe>(recipe =>
@@ -45,6 +56,41 @@ public class DepuChefDbContext(DbContextOptions<DepuChefDbContext> options) : Db
             recipe.HasMany(recipe => recipe.Ingredients).WithOne().IsRequired();
             recipe.HasMany(recipe => recipe.Instructions).WithOne().IsRequired();
             recipe.HasMany(recipe => recipe.Notes).WithOne();
+
+            recipe.Property(u => u.CreatedAt)
+            .HasDefaultValueSql("(GETUTCDATE())")
+            .IsRequired()
+            .Metadata
+            .SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
+
+            recipe.Property(u => u.UpdatedAt)
+            .HasDefaultValueSql("(GETUTCDATE())")
+            .IsRequired();
+
+        });
+
+        modelBuilder.Entity<Ingredient>(ingredient =>
+        {
+            ingredient.Navigation(ingredient => ingredient.Items).AutoInclude();
+            ingredient.HasKey(ingredient => ingredient.Id);
+            ingredient.HasMany(ingredient => ingredient.Items).WithOne().IsRequired();
+        });
+
+        modelBuilder.Entity<RecipeProcess>(process =>
+        {
+            process.HasKey(process => process.Id);
+            process.Property(process => process.ThreadId).IsRequired();
+
+            process.Property(u => u.CreatedAt)
+            .HasDefaultValueSql("(GETUTCDATE())")
+            .IsRequired()
+            .Metadata
+            .SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
+
+            process.Property(u => u.UpdatedAt)
+            .HasDefaultValueSql("(GETUTCDATE())")
+            .IsRequired();
+
         });
     }
 }

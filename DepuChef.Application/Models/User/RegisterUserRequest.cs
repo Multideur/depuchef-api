@@ -5,7 +5,6 @@ namespace DepuChef.Application.Models.User;
 public class RegisterUserRequest
 {
     public string? Email { get; set; }
-    public string? AuthUserId { get; set; }
     public string? FirstName  { get; set; }
     public string? LastName { get; set; }
     public string? ProfilePictureUrl { get; set; }
