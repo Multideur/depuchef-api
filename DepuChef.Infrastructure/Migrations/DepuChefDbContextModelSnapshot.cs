@@ -191,7 +191,7 @@ namespace DepuChef.Infrastructure.Migrations
                     b.Property<string>("AuthUserId")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("ChefPreference")
+                    b.Property<int>("ChefPreference")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
@@ -209,7 +209,7 @@ namespace DepuChef.Infrastructure.Migrations
                     b.Property<string>("LastName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("SubscriptionLevel")
+                    b.Property<int>("SubscriptionLevel")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("UpdatedAt")

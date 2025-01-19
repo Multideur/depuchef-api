@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DepuChef.Infrastructure.Migrations
 {
     [DbContext(typeof(DepuChefDbContext))]
-    [Migration("20250105014847_Initial")]
+    [Migration("20250119215913_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -194,7 +194,7 @@ namespace DepuChef.Infrastructure.Migrations
                     b.Property<string>("AuthUserId")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("ChefPreference")
+                    b.Property<int>("ChefPreference")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
@@ -212,7 +212,7 @@ namespace DepuChef.Infrastructure.Migrations
                     b.Property<string>("LastName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("SubscriptionLevel")
+                    b.Property<int>("SubscriptionLevel")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("UpdatedAt")

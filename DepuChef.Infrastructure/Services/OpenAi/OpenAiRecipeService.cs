@@ -10,6 +10,7 @@ using DepuChef.Application.Models.OpenAI.CleanUp;
 using DepuChef.Application.Services;
 using DepuChef.Application.Services.OpenAi;
 using DepuChef.Application.Repositories;
+using DepuChef.Application.Constants;
 
 namespace DepuChef.Infrastructure.Services.OpenAi;
 
@@ -67,7 +68,7 @@ public class OpenAiRecipeService(IFileManager fileManager,
                 return;
             }
 
-            logger.LogInformation("File uploaded successfully with Id: {fileId}", fileUploadResponse.Id);
+            logger.LogInformation($"File uploaded successfully with Id: {{{LogToken.FileId}}}", fileUploadResponse.Id);
 
             var threadRequest = CreateThreadRequest(fileUploadResponse);
             var runResponse = await threadManager.CreateThreadAndRun(threadRequest, cancellationToken);
@@ -92,17 +93,23 @@ public class OpenAiRecipeService(IFileManager fileManager,
                 runStatusResponse,
                 cancellationToken);
 
-            logger.LogInformation("Run completed successfully with ThreadId: {threadId}", runResponse.ThreadId);
+            logger.LogInformation($"Run completed successfully with ThreadId: {{{LogToken.ThreadId}}}", runResponse.ThreadId);
 
-            await clientNotifier.NotifyRecipeReady(recipeRequest.ConnectionId,
-                runResponse.ThreadId,
-                cancellationToken);
-
-            await processRepository.SaveRecipeProcess(new RecipeProcess
+            var recipeProcess = await processRepository.SaveRecipeProcess(new RecipeProcess
             {
                 ThreadId = runResponse.ThreadId,
                 FileId = fileUploadResponse.Id
             }, cancellationToken);
+
+            if (recipeProcess is null)
+            {
+                logger.LogError($"Failed to save recipe process for {{{LogToken.ThreadId}}}", runResponse.ThreadId);
+                return;
+            }
+
+            await clientNotifier.NotifyRecipeReady(recipeRequest.ConnectionId,
+                recipeProcess.Id.ToString(),
+                cancellationToken);
         }
         catch (Exception ex)
         {
@@ -111,13 +118,21 @@ public class OpenAiRecipeService(IFileManager fileManager,
         }
     }
 
-    public async Task<Recipe?> GetRecipeFromThread(string threadId, CancellationToken cancellationToken = default)
+    public async Task<Recipe?> GetRecipeByProcessId(Guid processId, CancellationToken cancellationToken = default)
     {
+        var process = await processRepository.GetRecipeProcessById(processId, cancellationToken);
+        if (process is null)
+        {
+            logger.LogWarning($"No recipe process found for process {{{LogToken.RecipeProcessId}}}.", processId);
+            return null;
+        }
+
+        var threadId = process.ThreadId;
         var messages = await messageManager.GetMessages(threadId, cancellationToken);
         if (messages is null)
         {
-            logger.LogError("Failed to get messages for thread {threadId}.", threadId);
-            throw new Exception($"Failed to get messages for thread {threadId}.");
+            logger.LogWarning($"Failed to get messages for thread {{{LogToken.ThreadId}}}.", threadId);
+            return null;
         }
 
         var recipe = (messages
@@ -135,13 +150,13 @@ public class OpenAiRecipeService(IFileManager fileManager,
             var error = JsonSerializer.Deserialize<RecipeError>(recipe, _jsonSerializerOptions);
             if (error is not null)
             {
-                logger.LogError("Error on generating recipe for thread {threadId}. Message: {message}",
+                logger.LogError($"Error on generating recipe for thread {{{LogToken.ThreadId}}}. Message: {{{LogToken.Message}}}",
                     threadId,
                     error.Message);
             }
             else
             {
-                logger.LogError("Could not retrieve an error for why recipe ws not generated on thread {threadId}.",
+                logger.LogError($"Could not retrieve an error for why recipe was not generated on thread {{{LogToken.ThreadId}}}.",
                     threadId);
             }
             return null;
@@ -217,7 +232,7 @@ public class OpenAiRecipeService(IFileManager fileManager,
         var process = await processRepository.GetRecipeProcessByThreadId(threadId, cancellationToken);
         if (process is null)
         {
-            logger.LogWarning("No process found for thread {threadId}.", threadId);
+            logger.LogWarning($"No process found for thread {{{LogToken.ThreadId}}}.", threadId);
             return;
         }
 

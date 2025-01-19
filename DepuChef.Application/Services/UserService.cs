@@ -14,7 +14,7 @@ public class UserService(
     public async Task<User?> RegisterUser(RegisterUserRequest request, CancellationToken cancellationToken)
     {
         var claims = claimsHelper.RetrieveClaims() ?? throw new Exception("Claims are required.");
-        var authUserId = claims.Single(claim => claim.Type == ClaimType.Sub).Value;
+        var authUserId = claims.SingleOrDefault(claim => claim.Type == ClaimType.Sub)?.Value;
         if (string.IsNullOrWhiteSpace(authUserId))
             throw new InvalidClaimException(ClaimType.Sub);
         var emailClaim = claims.SingleOrDefault(claim => claim.Type == ClaimType.Email)?.Value;
@@ -35,16 +35,16 @@ public class UserService(
             }
 
             return existingUser;
-        }   
+        }
 
         var user = new User
         {
-            ChefPreference = request.ChefPreference,
+            ChefPreference = ChefChoice.FromValue(request.ChefPreference, ChefChoice.Aduke),
             AuthUserId = authUserId,
             Email = request.Email,
             FirstName = request.FirstName,
             LastName = request.LastName,
-            SubscriptionLevel = request.SubscriptionLevel
+            SubscriptionLevel = SubscriptionLevel.FromValue(request.Subscription, SubscriptionLevel.Free)
         };
 
         return await userRepository.Add(user, cancellationToken);

@@ -6,12 +6,18 @@ services:
       context: .
       target: run
     ports:
-      - "8080:8080"
+      - "5000:5000"
+      - "5001:5001"
+      - "6000:6000"
+      - "6001:6001"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Server=db;Database=MyAppDb;User=sa;Password=MyPassword1
+      - ConnectionStrings:DepuChef=Server=database;Database=myApp;User=sa;Password=MyPassword1;TrustServerCertificate=True
     depends_on:
-      - database
+      database:
+          condition: service_started
+      run_database_migrations:
+        condition: service_completed_successfully
     profiles:
       - app
 
@@ -23,9 +29,9 @@ services:
     environment:
       - ACCEPT_EULA=Y
       - SA_PASSWORD=MyPassword1
-      - MSSQL_PID=Developer # Developer edition of SQL Server
-    volumes:
-      - sql_data:/var/opt/mssql # Persists database files
+      - MSSQL_PID=Express
+    expose:
+      - "1433"
     profiles:
       - database
 
@@ -33,14 +39,12 @@ services:
     build:
       context: .
       target: build
-    command: dotnet ef database update -p DepuChef.Infrastructure/DepuChef.Infrastructure.csproj -s DepuChef.Api/DepuChef.Api.csproj
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Server=database;Database=MyAppDb;User=sa;Password=MyPassword1
+    entrypoint: [ '/bin/sh', '-c' ]
+    command: |
+      "
+      dotnet ef database update -p ../DepuChef.Infrastructure/DepuChef.Infrastructure.csproj -s DepuChef.Api.csproj --verbose
+      "
     depends_on:
       - database
     profiles:
       - database
-
-volumes:
-  sql_data:

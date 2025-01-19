@@ -1,5 +1,6 @@
 using DepuChef.Api;
 using DepuChef.Api.Policies;
+using DepuChef.Api.Validators;
 using DepuChef.Application.Models;
 using DepuChef.Application.Models.OpenAI;
 using DepuChef.Application.Services;
@@ -9,6 +10,7 @@ using DepuChef.Infrastructure;
 using DepuChef.Infrastructure.Hubs;
 using DepuChef.Infrastructure.Services;
 using DepuChef.Infrastructure.Services.OpenAi;
+using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.OpenApi.Models;
@@ -21,6 +23,9 @@ var services = builder.Services;
 services.AddEndpointsApiExplorer();
 services.AddSwaggerGen();
 var configuration = builder.Configuration;
+
+// Register Validators
+services.AddValidatorsFromAssemblyContaining<RegisterUserRequestValidator>();
 
 services.AddScoped<ICleanUpService, CleanUpService>();
 services.AddScoped<IFileManager, FileManager>();
@@ -93,7 +98,12 @@ services.AddAuthorization(options =>
         });
 });
 
-services.ConfigureDatabase(configuration.GetSection("ConnectionStrings"));
+var connectionString = configuration.GetConnectionString("DepuChef");
+if (string.IsNullOrWhiteSpace(connectionString))
+{
+    throw new InvalidOperationException("Connection string is missing.");
+}
+services.ConfigureDatabase(connectionString);
 
 var swaggerInfo = new OpenApiInfo
 {

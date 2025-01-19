@@ -1,6 +1,8 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 COPY . /app
 WORKDIR /app
+RUN dotnet tool install --global dotnet-ef
+ENV PATH="$PATH:/root/.dotnet/tools"
 RUN dotnet tool restore
 RUN dotnet build
 
@@ -11,8 +13,6 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0-bookworm-slim as run
 COPY --from=build /app/out /app/
 WORKDIR /app
 
-EXPOSE 8080
-EXPOSE 8081
 EXPOSE 5000
 EXPOSE 5001
 EXPOSE 6000

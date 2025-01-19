@@ -1,8 +1,10 @@
 ﻿using DepuChef.Api.Models;
+using DepuChef.Application.Constants;
 using DepuChef.Application.Exceptions;
 using DepuChef.Application.Models;
 using DepuChef.Application.Models.User;
 using DepuChef.Application.Services;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DepuChef.Api;
@@ -17,7 +19,7 @@ public static class ApiV1
             .WithName("GenerateRecipe")
             .WithOpenApi();
 
-        app.MapGet("/recipe/{threadId}", GetRecipeFromThread)
+        app.MapGet("/recipe/{processId}", GetRecipeFromThread)
             .RequireAuthorization();
 
         app.MapPost("/identity/register", RegisterUser)
@@ -76,11 +78,11 @@ public static class ApiV1
     }
 
     private static async Task<IResult> GetRecipeFromThread(
-        string threadId,
+        Guid processId,
         IRecipeService recipeService,
         CancellationToken cancellationToken)
     {
-        var recipe = await recipeService.GetRecipeFromThread(threadId, cancellationToken);
+        var recipe = await recipeService.GetRecipeByProcessId(processId, cancellationToken);
         if (recipe == null)
         {
             return Results.NotFound();
@@ -117,15 +119,25 @@ public static class ApiV1
     }
 
     private static async Task<IResult> RegisterUser(
-        [FromBody] RegisterUserRequest registerUserRequest,
+        [FromBody] RegisterUserRequest request,
+        IValidator<RegisterUserRequest> validator,
         IUserService userService,
         ILogger<RegisterUserRequest> logger,
         CancellationToken cancellationToken)
     {
         try
         {
-            logger.LogInformation("Registering user with email: {email}", registerUserRequest.Email);
-            var result = await userService.RegisterUser(registerUserRequest, cancellationToken);
+            logger.LogInformation("Registering user with email: {email}", request.Email);
+
+            var validationResult = await validator.ValidateAsync(request, cancellationToken);
+            if (!validationResult.IsValid)
+            {
+                var validationErrors = validationResult.ToDictionary();
+                LogCollectionValues(validationErrors.Values, logger);
+                return Results.ValidationProblem(validationErrors);
+            }
+
+            var result = await userService.RegisterUser(request, cancellationToken);
             if (result == null)
             {
                 return Results.BadRequest();
@@ -169,6 +181,15 @@ public static class ApiV1
         {
             logger.LogError(ex, "An error occurred while registering user.");
             return Results.StatusCode(500);
+        }
+    }
+
+    private static void LogCollectionValues<T>(ICollection<string[]> collection, ILogger<T> logger)
+    {
+        foreach (var item in collection)
+        {
+            string concatenatedValues = string.Join(", ", item);
+            logger.LogWarning($"Validation errors: {{{LogToken.ValidationErrors}}}", concatenatedValues);
         }
     }
 }

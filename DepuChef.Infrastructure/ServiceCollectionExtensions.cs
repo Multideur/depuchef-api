@@ -11,10 +11,10 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection ConfigureDatabase(
         this IServiceCollection services,
-        IConfigurationSection section
+        string connectionString
     ) => services
             .AddDbContext<DepuChefDbContext>(options =>
-                options.UseSqlServer(section.GetConnectionString("DepuChef"))
+                options.UseSqlServer(connectionString)
             )
             .AddRepositories();
 

@@ -1,6 +1,17 @@
 @Depuchef.API_HostAddress = http://localhost:5213
 
-GET {{Depuchef.API_HostAddress}}/weatherforecast/
+GET {{Depuchef.API_HostAddress}}/recipe/1
 Accept: application/json
 
 ###
+POST {{Depuchef.API_HostAddress}}/identity/register
+Accept: application/json
+Content-Type: application/json
+{
+  "email": "testemail",
+  "firstName": "test",
+  "lastName": "test",
+  "profilePictureUrl": "test",
+  "chefPreference": 1,
+  "subscription": 1
+}

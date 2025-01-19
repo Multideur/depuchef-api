@@ -9,6 +9,6 @@ public class User : AuditedModel
     public string? Email { get; set; }
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
-    public SubscriptionLevel? SubscriptionLevel { get; set; }
-    public ChefChoice? ChefPreference { get; set; }
+    public required SubscriptionLevel SubscriptionLevel { get; set; }
+    public required ChefChoice ChefPreference { get; set; }
 }
