@@ -23,6 +23,11 @@ jobs:
         dotnet publish DepuChef.Api/DepuChef.Api.csproj -c Release -o $GITHUB_WORKSPACE/publish_output
         dotnet publish DepuChef.Infrastructure/DepuChef.Infrastructure.csproj -c Release -o $GITHUB_WORKSPACE/publish_output/Infrastructure
 
+    - name: Copy .csproj Files to Publish Directory
+      run: |
+        cp DepuChef.Api/DepuChef.Api.csproj publish_output/
+        cp DepuChef.Infrastructure/DepuChef.Infrastructure.csproj publish_output/Infrastructure/
+
     - name: Check publish output
       run: |
         echo "Contents of publish_output:"
@@ -30,26 +35,27 @@ jobs:
         echo "Contents of publish_output/Infrastructure:"
         ls -al $GITHUB_WORKSPACE/publish_output/Infrastructure
 
-  # deploy:
-  #   needs: build-and-publish
-  #   strategy:
-  #     matrix:
-  #       environment:
-  #         - development
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #   - name: Update Database
-  #     run: |
-  #       dotnet tool install --global dotnet-ef
-  #       dotnet ef database update \
-  #         -p $GITHUB_WORKSPACE/publish_output/Infrastructure/DepuChef.Infrastructure.csproj \
-  #         -s $GITHUB_WORKSPACE/publish_output/DepuChef.Api/DepuChef.Api.csproj \
-  #         --connection '${{ secrets.CONNECTION_STRING_DEPUCHEF }}'
-  #     env:
-  #       ASPNETCORE_ENVIRONMENT: ${{ matrix.environment }}
-  #   - name: Deploy to Azure Web Apps
-  #     uses: azure/webapps-deploy@v3
-  #     with:
-  #       app-name: ${{ env.AZURE_WEBAPP_NAME }}
-  #       publish-profile: ${{ secrets.AZURE_WEB_PUBLISH_PROFILE }}
-  #       package: $GITHUB_WORKSPACE/publish_output
+  deploy:
+    needs: build-and-publish
+    strategy:
+      matrix:
+        environment:
+          - development
+    runs-on: ubuntu-latest
+    steps:
+    - name: Update Database
+      run: |
+        dotnet tool install --global dotnet-ef
+        dotnet ef database update \
+          -p $GITHUB_WORKSPACE/publish_output/Infrastructure/DepuChef.Infrastructure.csproj \
+          -s $GITHUB_WORKSPACE/publish_output/DepuChef.Api/DepuChef.Api.csproj \
+          --connection '${{ secrets.CONNECTION_STRING_DEPUCHEF }}'
+      env:
+        ASPNETCORE_ENVIRONMENT: ${{ matrix.environment }}
+    - name: Deploy to Azure Web Apps
+      if: success()
+      uses: azure/webapps-deploy@v3
+      with:
+        app-name: ${{ env.AZURE_WEBAPP_NAME }}
+        publish-profile: ${{ secrets.AZURE_WEB_PUBLISH_PROFILE }}
+        package: $GITHUB_WORKSPACE/publish_output

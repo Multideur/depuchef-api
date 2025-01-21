@@ -30,12 +30,7 @@
     </PackageReference>
     <PackageReference Include="System.Text.Json" Version="8.0.5" />
   </ItemGroup>
-
-  <ItemGroup>
-    <None Update="Schema\recipeJsonSchema.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
+  
   <ItemGroup>
     <Content Include="Migrations\**\*.*">
 	  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
