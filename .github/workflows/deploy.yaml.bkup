@@ -1,0 +1,82 @@
+name: Deploy .NET Web API to Azure Web App
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:  
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.x'
+        
+    - name: Restore dependencies
+      run: dotnet restore
+      
+    - name: Build the project
+      run: dotnet build --configuration Release --no-restore
+
+    - name: Publish API project
+      if: success()
+      run: dotnet publish DepuChef.Api/DepuChef.Api.csproj -c Release -o publish_output --no-build
+
+    - name: Publish Infrastructure project
+      if: success()
+      run: dotnet publish DepuChef.Infrastructure/DepuChef.Infrastructure.csproj -c Release -o publish_output/Infrastructure --no-build
+
+    - name: Check publish output
+      run: |
+        echo "Contents of publish_output:"
+        ls -al publish_output
+        echo "Contents of publish_output/Infrastructure:"
+        ls -al publish_output/Infrastructure
+
+    - name: Upload artifact for deployment job
+      uses: actions/upload-artifact@v4
+      with:
+        name: depuchef-api
+        path: publish_output
+          
+  deploy:
+    strategy:
+      matrix:
+        environment:
+          - development
+    runs-on: ubuntu-latest
+    needs: build
+    environment: 
+      name: ${{ matrix.environment }} 
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+    steps:
+    - name: Download artifact from build job
+      uses: actions/download-artifact@v4
+      with:
+        name: depuchef-api
+
+    - name: Update database
+      run: |
+        dotnet tool install --global dotnet-ef
+        dotnet ef database update \
+          -p publish_output/Infrastructure/DepuChef.Infrastructure.csproj \
+          -s publish_output/DepuChef.Api/DepuChef.Api.csproj \
+          --connection '${{ secrets.CONNECTION_STRING_DEPUCHEF }}'
+      env:
+        ASPNETCORE_ENVIRONMENT: ${{ env.ASPNETCORE_ENVIRONMENT }}
+
+    - name: Deploy to Azure Web Apps
+      if: success()
+      id: deploy-to-webapp
+      uses: azure/webapps-deploy@v3
+      with: 
+        app-name: ${{ env.AZURE_WEBAPP_NAME }}
+        publish-profile: ${{ secrets.AZURE_WEB_PUBLISH_PROFILE }}
+        package: publish_output
