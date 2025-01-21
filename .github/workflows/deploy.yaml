@@ -25,8 +25,8 @@ jobs:
 
     - name: Copy .csproj Files to Publish Directory
       run: |
-        cp DepuChef.Api/DepuChef.Api.csproj publish_output/
-        cp DepuChef.Infrastructure/DepuChef.Infrastructure.csproj publish_output/Infrastructure/
+        cp DepuChef.Api/DepuChef.Api.csproj $GITHUB_WORKSPACE/publish_output/
+        cp DepuChef.Infrastructure/DepuChef.Infrastructure.csproj $GITHUB_WORKSPACE/publish_output/Infrastructure/
 
     - name: Check publish output
       run: |
