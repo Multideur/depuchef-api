@@ -53,6 +53,13 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: depuchef-api
+        
+    - name: Check publish output
+      run: |
+        echo "Contents of publish_output:"
+        ls -al publish_output
+        echo "Contents of publish_output/Infrastructure:"
+        ls -al publish_output/Infrastructure
 
     - name: Update Database
       run: |
