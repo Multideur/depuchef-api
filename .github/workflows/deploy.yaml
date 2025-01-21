@@ -43,6 +43,14 @@ jobs:
           - development
     runs-on: ubuntu-latest
     steps:
+
+    - name: Check publish output
+      run: |
+        echo "Contents of publish_output:"
+        ls -al $GITHUB_WORKSPACE/publish_output
+        echo "Contents of publish_output/Infrastructure:"
+        ls -al $GITHUB_WORKSPACE/publish_output/Infrastructure
+        
     - name: Update Database
       run: |
         dotnet tool install --global dotnet-ef
