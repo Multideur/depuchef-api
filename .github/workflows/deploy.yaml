@@ -33,6 +33,7 @@ jobs:
     steps:
     - name: Update Database
       run: |
+        dotnet tool install --global dotnet-ef
         dotnet ef database update \
           -p $GITHUB_WORKSPACE/publish_output/Infrastructure/DepuChef.Infrastructure.csproj \
           -s $GITHUB_WORKSPACE/publish_output/DepuChef.Api/DepuChef.Api.csproj \
