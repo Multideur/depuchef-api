@@ -25,15 +25,21 @@ jobs:
 
     - name: Copy .csproj Files to Publish Directory
       run: |
-        cp DepuChef.Api/DepuChef.Api.csproj $GITHUB_WORKSPACE/publish_output/
-        cp DepuChef.Infrastructure/DepuChef.Infrastructure.csproj $GITHUB_WORKSPACE/publish_output/Infrastructure/
+        cp DepuChef.Api/DepuChef.Api.csproj publish_output/
+        cp DepuChef.Infrastructure/DepuChef.Infrastructure.csproj publish_output/Infrastructure/
 
     - name: Check publish output
       run: |
         echo "Contents of publish_output:"
-        ls -al $GITHUB_WORKSPACE/publish_output
+        ls -al publish_output
         echo "Contents of publish_output/Infrastructure:"
-        ls -al $GITHUB_WORKSPACE/publish_output/Infrastructure
+        ls -al publish_output/Infrastructure
+    
+    - name: Upload artifact for deployment job
+      uses: actions/upload-artifact@v4
+      with:
+        name: depuchef-api
+        path: publish_output
 
   deploy:
     needs: build-and-publish
@@ -43,20 +49,17 @@ jobs:
           - development
     runs-on: ubuntu-latest
     steps:
+    - name: Download artifact from build job
+      uses: actions/download-artifact@v4
+      with:
+        name: depuchef-api
 
-    - name: Check publish output
-      run: |
-        echo "Contents of publish_output:"
-        ls -al $GITHUB_WORKSPACE/publish_output
-        echo "Contents of publish_output/Infrastructure:"
-        ls -al $GITHUB_WORKSPACE/publish_output/Infrastructure
-        
     - name: Update Database
       run: |
         dotnet tool install --global dotnet-ef
         dotnet ef database update \
-          -p $GITHUB_WORKSPACE/publish_output/Infrastructure/DepuChef.Infrastructure.csproj \
-          -s $GITHUB_WORKSPACE/publish_output/DepuChef.Api/DepuChef.Api.csproj \
+          -p publish_output/Infrastructure/DepuChef.Infrastructure.csproj \
+          -s publish_output/DepuChef.Api/DepuChef.Api.csproj \
           --connection '${{ secrets.CONNECTION_STRING_DEPUCHEF }}'
       env:
         ASPNETCORE_ENVIRONMENT: ${{ matrix.environment }}
