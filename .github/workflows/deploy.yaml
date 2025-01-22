@@ -28,11 +28,6 @@ jobs:
         cd DepuChef.Infrastructure
         dotnet ef migrations bundle
         mv efbundle ../publish_output/efbundle
-
-    - name: Check publish output
-      run: |
-        echo "Contents of publish_output:"
-        ls -al publish_output
     
     - name: Upload artifact for deployment job
       uses: actions/upload-artifact@v4
@@ -55,7 +50,7 @@ jobs:
 
     - name: Update Database
       run: |
-        efbundle --connection '${{ secrets.CONNECTION_STRING_DEPUCHEF }}'
+        publish_output/efbundle --connection '${{ secrets.CONNECTION_STRING_DEPUCHEF }}'
 
     - name: Deploy to Azure Web Apps
       if: success()
