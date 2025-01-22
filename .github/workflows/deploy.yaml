@@ -48,8 +48,11 @@ jobs:
       with:
         name: depuchef-api
 
+    - name: List contents of publish_output directory
+      run: ls -la
+
     - name: Make efbundle executable
-      run: chmod +x publish_output/efbundle.exe
+      run: chmod +x efbundle.exe
 
     - name: Update Database
       run: |
