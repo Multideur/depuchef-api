@@ -54,9 +54,13 @@ jobs:
     - name: Make efbundle executable
       run: chmod +x efbundle.exe
 
+    - name: Retrieve connection string
+      id: get-connection-string
+      run: echo "::set-output name=connection-string::${{ secrets.CONNECTION_STRING_DEPUCHEF }}"
+
     - name: Update Database
       run: |
-        ./efbundle.exe --connection '${{ secrets.CONNECTION_STRING_DEPUCHEF }}'
+        ./efbundle.exe --connection '${{ steps.get-connection-string.outputs.connection-string }}'
 
     - name: Deploy to Azure Web Apps
       if: success()
