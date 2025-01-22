@@ -48,19 +48,15 @@ jobs:
       with:
         name: depuchef-api
 
-    - name: List contents of publish_output directory
-      run: ls -la
+    # - name: List contents of publish_output directory
+    #   run: ls -la
 
-    - name: Make efbundle executable
-      run: chmod +x efbundle.exe
+    # - name: Make efbundle executable
+    #   run: chmod +x efbundle.exe
 
-    - name: Retrieve connection string
-      id: get-connection-string
-      run: echo "connection-string=${{ secrets.CONNECTION_STRING_DEPUCHEF }}" >> $GITHUB_ENV
-
-    - name: Update Database
-      run: |
-        ./efbundle.exe --connection '${{ env.connection-string }}'
+    # - name: Update Database
+    #   run: |
+    #     ./efbundle.exe --connection '${{ secrets.CONNECTION_STRING_DEPUCHEF }}'
 
     - name: Deploy to Azure Web Apps
       if: success()
