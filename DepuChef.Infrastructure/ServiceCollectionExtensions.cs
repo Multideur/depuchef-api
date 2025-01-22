@@ -2,7 +2,6 @@
 using DepuChef.Infrastructure.DbContexts;
 using DepuChef.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DepuChef.Infrastructure;

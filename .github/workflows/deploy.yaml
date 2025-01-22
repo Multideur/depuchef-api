@@ -20,20 +20,20 @@ jobs:
       run: |
         dotnet restore
         dotnet build --configuration Release --no-restore
-        dotnet publish DepuChef.Api/DepuChef.Api.csproj -c Release -o $GITHUB_WORKSPACE/publish_output
-        dotnet publish DepuChef.Infrastructure/DepuChef.Infrastructure.csproj -c Release -o $GITHUB_WORKSPACE/publish_output/Infrastructure
+        dotnet publish DepuChef.Api/DepuChef.Api.csproj -c Release -o publish_output
 
-    - name: Copy .csproj Files to Publish Directory
+    - name: Bundle EF migrations
       run: |
-        cp DepuChef.Api/DepuChef.Api.csproj publish_output/
-        cp DepuChef.Infrastructure/DepuChef.Infrastructure.csproj publish_output/Infrastructure/
+        dotnet tool install --global dotnet-ef
+        cd DepuChef.Infrastructure
+        dotnet ef migrations bundle
+        # Move the bundle to the publish_output directory
+        mv efbundle.exe ../publish_output/bundle.sql
 
     - name: Check publish output
       run: |
         echo "Contents of publish_output:"
         ls -al publish_output
-        echo "Contents of publish_output/Infrastructure:"
-        ls -al publish_output/Infrastructure
     
     - name: Upload artifact for deployment job
       uses: actions/upload-artifact@v4
@@ -53,21 +53,11 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: depuchef-api
-        
-    - name: Check publish output
-      run: |
-        echo "Contents of publish_output/Infrastructure:"
-        ls -al Infrastructure/
 
     - name: Update Database
       run: |
-        dotnet tool install --global dotnet-ef
-        dotnet ef database update \
-          -p Infrastructure/DepuChef.Infrastructure.csproj \
-          -s DepuChef.Api/DepuChef.Api.csproj \
-          --connection '${{ secrets.CONNECTION_STRING_DEPUCHEF }}'
-      env:
-        ASPNETCORE_ENVIRONMENT: ${{ matrix.environment }}
+        efbundle --connection '${{ secrets.CONNECTION_STRING_DEPUCHEF }}'
+        
     - name: Deploy to Azure Web Apps
       if: success()
       uses: azure/webapps-deploy@v3
