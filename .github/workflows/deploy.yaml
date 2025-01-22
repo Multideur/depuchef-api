@@ -58,9 +58,9 @@ jobs:
       with:
         name: depuchef-api
 
-    - name: Update database
-      run: |
-        ./efbundle.exe --connection ${{ secrets.CONNECTION_STRING_DEPUCHEF }}
+    # - name: Update database
+    #   run: |
+    #     ./efbundle.exe --connection ${{ secrets.CONNECTION_STRING_DEPUCHEF }}
 
     - name: Login to Azure
       uses: azure/login@v1
