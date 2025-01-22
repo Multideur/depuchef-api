@@ -27,7 +27,7 @@ jobs:
         dotnet tool install --global dotnet-ef
         cd DepuChef.Infrastructure
         dotnet ef migrations bundle
-        mv efbundle ../publish_output/efbundle
+        mv efbundle ../publish_output/efbundle.exe
     
     - name: Upload artifact for deployment job
       uses: actions/upload-artifact@v4
@@ -50,7 +50,7 @@ jobs:
 
     - name: Update Database
       run: |
-        .\efbundle.exe --connection '${{ secrets.CONNECTION_STRING_DEPUCHEF }}'
+        efbundle.exe --connection '${{ secrets.CONNECTION_STRING_DEPUCHEF }}'
 
     - name: Deploy to Azure Web Apps
       if: success()
