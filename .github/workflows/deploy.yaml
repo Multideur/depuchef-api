@@ -27,9 +27,7 @@ jobs:
         dotnet tool install --global dotnet-ef
         cd DepuChef.Infrastructure
         dotnet ef migrations bundle
-        ls -al
-        # Move the bundle to the publish_output directory
-        mv efbundle.exe ../publish_output/bundle.sql
+        mv efbundle ../publish_output/efbundle
 
     - name: Check publish output
       run: |
