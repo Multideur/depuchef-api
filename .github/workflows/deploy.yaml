@@ -56,11 +56,11 @@ jobs:
 
     - name: Retrieve connection string
       id: get-connection-string
-      run: echo "::set-output name=connection-string::${{ secrets.CONNECTION_STRING_DEPUCHEF }}"
+      run: echo "connection-string=${{ secrets.CONNECTION_STRING_DEPUCHEF }}" >> $GITHUB_ENV
 
     - name: Update Database
       run: |
-        ./efbundle.exe --connection '${{ steps.get-connection-string.outputs.connection-string }}'
+        ./efbundle.exe --connection '${{ env.connection-string }}'
 
     - name: Deploy to Azure Web Apps
       if: success()
