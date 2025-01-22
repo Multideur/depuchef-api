@@ -50,6 +50,7 @@ jobs:
 
     - name: Update Database
       run: |
+        ls la
         efbundle.exe --connection '${{ secrets.CONNECTION_STRING_DEPUCHEF }}'
 
     - name: Deploy to Azure Web Apps
