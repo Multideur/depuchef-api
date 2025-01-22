@@ -6,21 +6,28 @@ on:
     branches:
       - main
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
-  build-and-publish:
+  build-and-publish:  
     runs-on: ubuntu-latest
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '8.x'
+        
     - name: Restore, Build, and Publish
       run: |
         dotnet restore
         dotnet build --configuration Release --no-restore
-        dotnet publish DepuChef.Api/DepuChef.Api.csproj -c Release -o publish_output
+        dotnet publish DepuChef.Api/DepuChef.Api.csproj -c Release -o publish_output --no-build
 
     - name: Bundle EF migrations
       run: |
@@ -28,40 +35,44 @@ jobs:
         cd DepuChef.Infrastructure
         dotnet ef migrations bundle
         mv efbundle ../publish_output/efbundle.exe
-    
+
     - name: Upload artifact for deployment job
       uses: actions/upload-artifact@v4
       with:
         name: depuchef-api
         path: publish_output
-
+          
   deploy:
-    needs: build-and-publish
     strategy:
       matrix:
         environment:
           - development
     runs-on: ubuntu-latest
+    needs: build-and-publish
+    environment: 
+      name: ${{ matrix.environment }} 
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     steps:
     - name: Download artifact from build job
       uses: actions/download-artifact@v4
       with:
         name: depuchef-api
 
-    # - name: List contents of publish_output directory
-    #   run: ls -la
+    - name: Update database
+      run: |
+        ./efbundle.exe --connection ${{ secrets.CONNECTION_STRING_DEPUCHEF }}
 
-    # - name: Make efbundle executable
-    #   run: chmod +x efbundle.exe
-
-    # - name: Update Database
-    #   run: |
-    #     ./efbundle.exe --connection '${{ secrets.CONNECTION_STRING_DEPUCHEF }}'
-
+    - name: Login to Azure
+    - uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
     - name: Deploy to Azure Web Apps
       if: success()
+      id: deploy-to-webapp
       uses: azure/webapps-deploy@v3
-      with:
+      with: 
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
-        publish-profile: ${{ secrets.AZURE_WEB_PUBLISH_PROFILE }}
+        # publish-profile: ${{ secrets.AZURE_WEB_PUBLISH_PROFILE }}
         package: publish_output
