@@ -29,12 +29,12 @@ jobs:
         dotnet build --configuration Release --no-restore
         dotnet publish DepuChef.Api/DepuChef.Api.csproj -c Release -o publish_output --no-build
 
-    - name: Bundle EF migrations
-      run: |
-        dotnet tool install --global dotnet-ef
-        cd DepuChef.Infrastructure
-        dotnet ef migrations bundle
-        mv efbundle ../publish_output/efbundle.exe
+    # - name: Bundle EF migrations
+    #   run: |
+    #     dotnet tool install --global dotnet-ef
+    #     cd DepuChef.Infrastructure
+    #     dotnet ef migrations bundle
+    #     mv efbundle ../publish_output/efbundle.exe
 
     - name: Upload artifact for deployment job
       uses: actions/upload-artifact@v4
