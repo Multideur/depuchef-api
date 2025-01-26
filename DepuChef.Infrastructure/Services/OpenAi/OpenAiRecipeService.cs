@@ -115,7 +115,7 @@ public class OpenAiRecipeService(IFileManager fileManager,
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to create recipe from image");
-            await NotifyErrorAndLog(recipeRequest.ConnectionId!, $"Failed to create recipe from image. Error: ${ex.Message}", cancellationToken);
+            await NotifyErrorAndLog(recipeRequest.ConnectionId!, $"Failed to create recipe from image. \nError: ${ex.Message}", cancellationToken);
             throw;
         }
     }
