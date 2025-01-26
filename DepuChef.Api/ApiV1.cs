@@ -35,33 +35,22 @@ public static class ApiV1
     private static async Task<IResult> CreateRecipeFromImage(
         [FromForm] RecipeRequest recipeRequest,
         [FromServices] IRecipeRequestBackgroundService backgroundService,
+        IValidator<RecipeRequest> validator,
         ILogger<RecipeRequest> logger,
         CancellationToken cancellationToken)
     {
         logger.LogInformation("Creating recipe from image.");
+
+        var validationResult = await validator.ValidateAsync(recipeRequest, cancellationToken);
+        if (!validationResult.IsValid)
+        {
+            var validationErrors = validationResult.ToDictionary();
+            LogCollectionValues(validationErrors.Values, logger);
+            return Results.ValidationProblem(validationErrors);
+        }
         var image = recipeRequest.Image;
-        if (image == null)
-        {
-            return Results.BadRequest("Image is required.");
-        }
-
-        if (image.Length == 0)
-        {
-            return Results.BadRequest("Image is empty.");
-        }
-
-        if (image.Length > 5_000_000)
-        {
-            return Results.BadRequest("Image is too large.");
-        }
-
-        if (!image.ContentType.Contains("image"))
-        {
-            return Results.BadRequest("File is not an image.");
-        }
-
         var memoryStream = new MemoryStream();
-        await image.CopyToAsync(memoryStream, cancellationToken);
+        await image!.CopyToAsync(memoryStream, cancellationToken);
         memoryStream.Position = 0;
 
         var backgroundRecipeRequest = new BackgroundRecipeRequest
