@@ -66,7 +66,7 @@ public class ThreadManager(IHttpService httpService,
             cancellationToken: cancellationToken);
 
         if (!response.IsSuccessStatusCode)
-            throw new Exception($"Failed to create thread and run. \nStatus code: {response.StatusCode}. \nResponse: {JsonSerializer.Serialize(response.Content)}");
+            throw new Exception($"Failed to create thread and run. \nStatus code: {response.StatusCode}.\nUrl: {url} \nContent: {JsonSerializer.Serialize(content)}");
 
         var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
         return JsonSerializer.Deserialize<RunResponse>(responseContent);
