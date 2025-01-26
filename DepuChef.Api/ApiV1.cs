@@ -19,10 +19,13 @@ public static class ApiV1
             .WithName("GenerateRecipe")
             .WithOpenApi();
 
-        app.MapGet("/recipe/{processId}", GetRecipeFromThread)
+        app.MapGet("/recipe/{processId}", GetRecipeFromProcess)
             .RequireAuthorization();
 
         app.MapPost("/identity/register", RegisterUser)
+            .RequireAuthorization();
+
+        app.MapGet("/user/{id}", GetUser)
             .RequireAuthorization();
 
         app.MapGet("/test", () =>
@@ -66,7 +69,7 @@ public static class ApiV1
         return Results.Ok();
     }
 
-    private static async Task<IResult> GetRecipeFromThread(
+    private static async Task<IResult> GetRecipeFromProcess(
         Guid processId,
         IRecipeService recipeService,
         CancellationToken cancellationToken)
@@ -171,6 +174,28 @@ public static class ApiV1
             logger.LogError(ex, "An error occurred while registering user.");
             return Results.StatusCode(500);
         }
+    }
+
+    private static async Task<IResult> GetUser(
+        Guid id,
+        IUserService userService,
+        CancellationToken cancellationToken)
+    {
+        var user = await userService.GetUser(id, cancellationToken);
+        if (user == null)
+        {
+            return Results.NotFound();
+        }
+        var userResponse = new UserResponse
+        {
+            Id = user.Id,
+            Email = user.Email,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            SubscriptionLevel = user.SubscriptionLevel,
+            ChefPreference = user.ChefPreference
+        };
+        return Results.Ok(userResponse);
     }
 
     private static void LogCollectionValues<T>(ICollection<string[]> collection, ILogger<T> logger)

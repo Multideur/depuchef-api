@@ -15,4 +15,12 @@ public class ClientNotifier(IHubContext<NotificationHub> hubContext,
             message, 
             cancellationToken: cancellationToken);
     }
+
+    public async Task NotifyError(string clientId, string message, CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Notifying client {clientId} that an error occurred", clientId);
+        await hubContext.Clients.Client(clientId).SendAsync("Error",
+            message,
+            cancellationToken: cancellationToken);
+    }
 }

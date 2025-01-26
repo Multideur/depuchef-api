@@ -33,21 +33,21 @@ public class OpenAiRecipeService(IFileManager fileManager,
     {
         try
         {
+            if (recipeRequest.ConnectionId is null)
+            {
+                logger.LogError("ConnectionId is required. Cannot notify client.");
+                return;
+            }
+
             if (recipeRequest.Image is null)
             {
-                logger.LogError("Image is required");
+                await NotifyErrorAndLog(recipeRequest.ConnectionId, "Image is required", cancellationToken);
                 return;
             }
 
             if (recipeRequest.Stream is null)
             {
-                logger.LogError("Stream is required");
-                return;
-            }
-
-            if (recipeRequest.ConnectionId is null)
-            {
-                logger.LogError("ConnectionId is required. Cannot notify client.");
+                await NotifyErrorAndLog(recipeRequest.ConnectionId, "Stream is required", cancellationToken);
                 return;
             }
 
@@ -64,7 +64,7 @@ public class OpenAiRecipeService(IFileManager fileManager,
             var fileUploadResponse = await UploadFile(fileUploadRequest, cancellationToken);
             if (fileUploadResponse is null || fileUploadResponse.Id is null)
             {
-                logger.LogError("Failed to upload file");
+                await NotifyErrorAndLog(recipeRequest.ConnectionId, "Failed to upload file", cancellationToken);
                 return;
             }
 
@@ -74,7 +74,7 @@ public class OpenAiRecipeService(IFileManager fileManager,
             var runResponse = await threadManager.CreateThreadAndRun(threadRequest, cancellationToken);
             if (runResponse is null || runResponse.ThreadId is null || runResponse.Id is null)
             {
-                logger.LogError("Failed to create run");
+                await NotifyErrorAndLog(recipeRequest.ConnectionId, "Failed to create run", cancellationToken);
                 return;
             }
 
@@ -84,7 +84,7 @@ public class OpenAiRecipeService(IFileManager fileManager,
 
             if (runStatusResponse is null || runStatusResponse.Status is null)
             {
-                logger.LogError("Failed to get run status");
+                await NotifyErrorAndLog(recipeRequest.ConnectionId, "Failed to get run status", cancellationToken);
                 return;
             }
 
@@ -104,6 +104,7 @@ public class OpenAiRecipeService(IFileManager fileManager,
             if (recipeProcess is null)
             {
                 logger.LogError($"Failed to save recipe process for {{{LogToken.ThreadId}}}", runResponse.ThreadId);
+                await NotifyErrorAndLog(recipeRequest.ConnectionId, "Failed to save recipe process", cancellationToken);
                 return;
             }
 
@@ -114,6 +115,7 @@ public class OpenAiRecipeService(IFileManager fileManager,
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to create recipe from image");
+            await NotifyErrorAndLog(recipeRequest.ConnectionId!, $"Failed to create recipe from image. Error: ${ex.Message}", cancellationToken);
             throw;
         }
     }
@@ -243,5 +245,11 @@ public class OpenAiRecipeService(IFileManager fileManager,
         };
 
         await cleanUpService.CleanUp(cleanUpRequest, cancellationToken);
+    }
+
+    private async Task NotifyErrorAndLog(string connectionId, string message, CancellationToken cancellationToken)
+    {
+        await clientNotifier.NotifyError(connectionId, message, cancellationToken);
+        logger.LogError(message);
     }
 }
