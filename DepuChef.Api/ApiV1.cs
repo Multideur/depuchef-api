@@ -14,13 +14,13 @@ public static class ApiV1
     public static void AddEndpoints(this WebApplication app)
     {
         app.MapPost("/recipe/create", CreateRecipeFromImage)
-            //.RequireAuthorization()
+            .RequireAuthorization()
             .DisableAntiforgery()
             .WithName("GenerateRecipe")
             .WithOpenApi();
 
-        app.MapGet("/recipe/{processId}", GetRecipeFromProcess);
-            //.RequireAuthorization();
+        app.MapGet("/recipe/{processId}", GetRecipeFromProcess)
+            .RequireAuthorization();
 
         app.MapPost("/identity/register", RegisterUser)
             .RequireAuthorization();
