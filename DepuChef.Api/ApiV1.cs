@@ -28,11 +28,13 @@ public static class ApiV1
         app.MapGet("/user/{id}", GetUser)
             .RequireAuthorization();
 
-        app.MapGet("/test", () =>
+        app.MapGet("/test", async (IRecipeService recipeService) =>
         {
+            var recipe = await recipeService.GetRecipeByProcessId(Guid.NewGuid(), CancellationToken.None);
             Console.WriteLine("This is a test log. Depuchef");
+
             return Results.Ok("Hello, World!");
-        }).RequireAuthorization();
+        });
     }
 
     private static async Task<IResult> CreateRecipeFromImage(
