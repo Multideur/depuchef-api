@@ -4,6 +4,7 @@ using DepuChef.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DepuChef.Infrastructure.Migrations
 {
     [DbContext(typeof(DepuChefDbContext))]
-    partial class DepuChefDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250316022221_UpdateSchemaWithSubstitutions")]
+    partial class UpdateSchemaWithSubstitutions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

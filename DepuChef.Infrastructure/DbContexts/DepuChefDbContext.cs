@@ -74,8 +74,10 @@ public class DepuChefDbContext(DbContextOptions<DepuChefDbContext> options) : Db
         modelBuilder.Entity<Ingredient>(ingredient =>
         {
             ingredient.Navigation(ingredient => ingredient.Items).AutoInclude();
+            ingredient.Navigation(ingredient => ingredient.HealthySubstitutions).AutoInclude();
             ingredient.HasKey(ingredient => ingredient.Id);
             ingredient.HasMany(ingredient => ingredient.Items).WithOne().IsRequired();
+            ingredient.HasMany(ingredient => ingredient.HealthySubstitutions).WithOne().IsRequired();
         });
 
         modelBuilder.Entity<RecipeProcess>(process =>

@@ -92,7 +92,18 @@ public static class ApiV1
             Ingredients = recipe.Ingredients?.Select(r => new IngredientDto
             {
                 Category = r.Category,
-                Items = r.Items?.Select(i => i.Name).ToList()
+                Items = r.Items?.Select(i => new IngredientItemDto
+                {
+                    Name = i.Name,
+                    Calories = i.Calories,
+                }).ToList(),
+                Calories = r.Calories,
+                HealthySubstitutions = r.HealthySubstitutions?.Select(h => new HealthySubstitutionDto
+                {
+                    Original = h.Original,
+                    Substitute = h.Substitute
+                }).ToList(),
+                CaloriesAfterSubstitution = r.CaloriesAfterSubstitution
             }).ToList(),
             Instructions = recipe.Instructions?.Select(r => new InstructionDto
             {
@@ -109,7 +120,9 @@ public static class ApiV1
             PrepTime = recipe.PrepTime,
             Rating = recipe.Rating,
             Servings = recipe.Servings,
-            TotalTime = recipe.TotalTime
+            TotalTime = recipe.TotalTime,
+            Calories = recipe.Calories,
+            CaloriesAfterSubstitution = recipe.CaloriesAfterSubstitution
         };
 
         return Results.Ok(recipeResponse);
@@ -138,7 +151,18 @@ public static class ApiV1
             Ingredients = r.Ingredients?.Select(i => new IngredientDto
             {
                 Category = i.Category,
-                Items = i.Items?.Select(i => i.Name).ToList()
+                Items = i.Items?.Select(i => new IngredientItemDto
+                {
+                    Name = i.Name,
+                    Calories = i.Calories
+                }).ToList(),
+                Calories = i.Calories,
+                HealthySubstitutions = i.HealthySubstitutions?.Select(h => new HealthySubstitutionDto
+                {
+                    Original = h.Original,
+                    Substitute = h.Substitute
+                }).ToList(),
+                CaloriesAfterSubstitution = i.CaloriesAfterSubstitution
             }).ToList(),
             Instructions = r.Instructions?.Select(i => new InstructionDto
             {
@@ -155,7 +179,9 @@ public static class ApiV1
             PrepTime = r.PrepTime,
             Rating = r.Rating,
             Servings = r.Servings,
-            TotalTime = r.TotalTime
+            TotalTime = r.TotalTime,
+            Calories = r.Calories,
+            CaloriesAfterSubstitution = r.CaloriesAfterSubstitution
         }).ToList();
 
         return Results.Ok(recipeResponses);
@@ -204,7 +230,7 @@ public static class ApiV1
             var problemDetails = new ProblemDetails
             {
                 Title = "Invalid claim.",
-                Detail = ex.Message
+                Detail = ex.Message + $" {ex.ClaimType}"
             };
 
             return Results.BadRequest(problemDetails);

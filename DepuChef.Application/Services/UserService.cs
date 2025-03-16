@@ -52,9 +52,7 @@ public class UserService(
         CheckClaims(claimsHelper, out string? authUserId, out _);
         var user = await userRepository.GetUser(email, cancellationToken);
 
-        return user?.AuthUserId != authUserId 
-            ? throw new InvalidOperationException("User not found or mismatched.") 
-            : user;
+        return user; ;
     }
 
     public async Task<User?> GetUser(Guid id, CancellationToken cancellationToken)

@@ -4,6 +4,7 @@ using DepuChef.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DepuChef.Infrastructure.Migrations
 {
     [DbContext(typeof(DepuChefDbContext))]
-    partial class DepuChefDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250316005359_Include-Calories")]
+    partial class IncludeCalories
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,30 +25,6 @@ namespace DepuChef.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("DepuChef.Application.Models.HealthySubstitution", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("IngredientId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Original")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Substitute")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("IngredientId");
-
-                    b.ToTable("HealthySubstitution");
-                });
-
             modelBuilder.Entity("DepuChef.Application.Models.Ingredient", b =>
                 {
                     b.Property<Guid>("Id")
@@ -53,9 +32,6 @@ namespace DepuChef.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int?>("Calories")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("CaloriesAfterSubstitution")
                         .HasColumnType("int");
 
                     b.Property<string>("Category")
@@ -269,15 +245,6 @@ namespace DepuChef.Infrastructure.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("DepuChef.Application.Models.HealthySubstitution", b =>
-                {
-                    b.HasOne("DepuChef.Application.Models.Ingredient", null)
-                        .WithMany("HealthySubstitutions")
-                        .HasForeignKey("IngredientId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("DepuChef.Application.Models.Ingredient", b =>
                 {
                     b.HasOne("DepuChef.Application.Models.Recipe", null)
@@ -323,8 +290,6 @@ namespace DepuChef.Infrastructure.Migrations
 
             modelBuilder.Entity("DepuChef.Application.Models.Ingredient", b =>
                 {
-                    b.Navigation("HealthySubstitutions");
-
                     b.Navigation("Items");
                 });
 
