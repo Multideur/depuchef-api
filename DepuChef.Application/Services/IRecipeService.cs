@@ -5,6 +5,7 @@ namespace DepuChef.Application.Services
     public interface IRecipeService
     {
         Task CreateRecipeFromImage(BackgroundRecipeRequest recipeRequest, CancellationToken cancellationToken);
-        Task<Recipe?> GetRecipeByProcessId(Guid processId, CancellationToken cancellationToken); 
+        Task<Recipe?> GetRecipeByProcessId(Guid processId, CancellationToken cancellationToken);
+        Task<IList<Recipe>> GetRecipes(Guid userId, CancellationToken cancellationToken);
     }
 }

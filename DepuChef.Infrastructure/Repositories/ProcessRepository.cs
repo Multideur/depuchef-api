@@ -15,7 +15,7 @@ public class ProcessRepository(DepuChefDbContext dbContext) : IProcessRepository
 
     public async Task<RecipeProcess?> SaveRecipeProcess(RecipeProcess recipeProcess, CancellationToken cancellationToken = default)
     {
-        var entity = dbContext.RecipeProcesses.Add(recipeProcess);
+        var entity = await dbContext.RecipeProcesses.AddAsync(recipeProcess);
         await dbContext.SaveChangesAsync(cancellationToken);
         return entity.Entity;
     }

@@ -13,13 +13,10 @@ public class UserService(
 {
     public async Task<User?> RegisterUser(RegisterUserRequest request, CancellationToken cancellationToken)
     {
-        var claims = claimsHelper.RetrieveClaims() ?? throw new Exception("Claims are required.");
-        var authUserId = claims.SingleOrDefault(claim => claim.Type == ClaimType.Sub)?.Value;
-        if (string.IsNullOrWhiteSpace(authUserId))
-            throw new InvalidClaimException(ClaimType.Sub);
-        var emailClaim = claims.SingleOrDefault(claim => claim.Type == ClaimType.Email)?.Value;
-        if (string.IsNullOrWhiteSpace(emailClaim))
-            throw new InvalidClaimException(ClaimType.Email);
+        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(request.Email);
+
+        CheckClaims(claimsHelper, out string? authUserId, out string? emailClaim);
 
         if (emailClaim != request.Email)
         {
@@ -50,7 +47,34 @@ public class UserService(
         return await userRepository.Add(user, cancellationToken);
     }
 
-    public async Task<User?> GetUser(string email, CancellationToken cancellationToken) => await userRepository.GetUser(email, cancellationToken);
+    public async Task<User?> GetUser(string email, CancellationToken cancellationToken)
+    {
+        CheckClaims(claimsHelper, out string? authUserId, out _);
+        var user = await userRepository.GetUser(email, cancellationToken);
 
-    public async Task<User?> GetUser(Guid id, CancellationToken cancellationToken) => await userRepository.GetUser(id, cancellationToken);
+        return user?.AuthUserId != authUserId 
+            ? throw new InvalidOperationException("User not found or mismatched.") 
+            : user;
+    }
+
+    public async Task<User?> GetUser(Guid id, CancellationToken cancellationToken)
+    {
+        CheckClaims(claimsHelper, out string? authUserId, out _);
+        var user = await userRepository.GetUser(id, cancellationToken);
+
+        return user?.AuthUserId != authUserId 
+            ? throw new InvalidOperationException("User not found or mismatched.") 
+            : user;
+    }
+
+    private static void CheckClaims(IClaimsHelper claimsHelper, out string? authUserId, out string? emailClaim)
+    {
+        var claims = claimsHelper.RetrieveClaims() ?? throw new Exception("Claims are required.");
+        authUserId = claims.SingleOrDefault(claim => claim.Type == ClaimType.Sub)?.Value;
+        if (string.IsNullOrWhiteSpace(authUserId))
+            throw new InvalidClaimException(ClaimType.Sub);
+        emailClaim = claims.SingleOrDefault(claim => claim.Type == ClaimType.Email)?.Value;
+        if (string.IsNullOrWhiteSpace(emailClaim))
+            throw new InvalidClaimException(ClaimType.Email);
+    }
 }
