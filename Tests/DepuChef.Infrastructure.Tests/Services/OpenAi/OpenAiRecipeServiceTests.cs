@@ -23,6 +23,7 @@ public class OpenAiRecipeServiceTests
     private readonly Mock<ICleanUpService> _mockCleanUpService = new();
     private readonly Mock<IClientNotifier> _mockClientNotifier = new();
     private readonly Mock<IProcessRepository> _mockProcessRepository = new();
+    private readonly Mock<IRecipeRepository> _mockRecipeRepository = new();
     private readonly Mock<IOptions<OpenAiOptions>> _mockOptions = new();
     private readonly Mock<ILogger<OpenAiRecipeService>> _mockLogger = new();
 
@@ -162,6 +163,7 @@ public class OpenAiRecipeServiceTests
             _mockCleanUpService.Object,
             _mockClientNotifier.Object,
             _mockProcessRepository.Object,
+            _mockRecipeRepository.Object,
             _mockOptions.Object,
             _mockLogger.Object
             );
