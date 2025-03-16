@@ -12,13 +12,15 @@ public static class ServiceCollectionExtensions
         this IServiceCollection services,
         string connectionString
     ) => services
-            .AddDbContext<DepuChefDbContext>(options =>
-                options.UseSqlServer(connectionString)
+            .AddDbContext<DepuChefDbContext>(optionsBuilder =>
+                optionsBuilder.UseSqlServer(connectionString,
+                    options => options.EnableRetryOnFailure())
             )
             .AddRepositories();
 
     public static IServiceCollection AddRepositories(this IServiceCollection services) =>
         services
+            .AddScoped<IRecipeRepository, RecipeRepository>()
             .AddScoped<IUserRepository, UserRepository>()
             .AddScoped<IProcessRepository, ProcessRepository>();
 }
