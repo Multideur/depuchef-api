@@ -4,5 +4,6 @@ namespace DepuChef.Application.Repositories;
 
 public interface IRecipeRepository
 {
-    Task Add(Recipe recipe);
+    Task<Recipe> Add(Recipe recipe, CancellationToken cancellationToken);
+    Task<List<Recipe>> GetRecipes(Guid userId, CancellationToken cancellationToken);
 }

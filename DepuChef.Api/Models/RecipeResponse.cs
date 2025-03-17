@@ -1,12 +1,12 @@
-﻿using DepuChef.Application.Models;
-
-namespace DepuChef.Api.Models;
+﻿namespace DepuChef.Api.Models;
 
 public class RecipeResponse
 {
     public Guid Id { get; set; }
     public string? Title { get; set; }
     public string? Description { get; set; }
+    public int? Calories { get; internal set; }
+    public int CaloriesAfterSubstitution { get; internal set; }
     public string? PrepTime { get; set; }
     public string? CookTime { get; set; }
     public string? TotalTime { get; set; }

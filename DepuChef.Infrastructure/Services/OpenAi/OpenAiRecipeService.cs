@@ -20,6 +20,7 @@ public class OpenAiRecipeService(IFileManager fileManager,
     ICleanUpService cleanUpService,
     IClientNotifier clientNotifier,
     IProcessRepository processRepository,
+    IRecipeRepository recipeRepository,
     IOptions<OpenAiOptions> options,
     ILogger<OpenAiRecipeService> logger) : IRecipeService
 {
@@ -98,7 +99,8 @@ public class OpenAiRecipeService(IFileManager fileManager,
             var recipeProcess = await processRepository.SaveRecipeProcess(new RecipeProcess
             {
                 ThreadId = runResponse.ThreadId,
-                FileId = fileUploadResponse.Id
+                FileId = fileUploadResponse.Id,
+                UserId = recipeRequest.UserId
             }, cancellationToken);
 
             if (recipeProcess is null)
@@ -164,10 +166,16 @@ public class OpenAiRecipeService(IFileManager fileManager,
             return null;
         }
 
+        deserializeRecipe.UserId = process.UserId;
+        var savedRecipe = await recipeRepository.Add(deserializeRecipe, cancellationToken);
+
         _ = CleanUp(threadId, cancellationToken);
 
-        return deserializeRecipe;
+        return savedRecipe;
     }
+
+    public async Task<IList<Recipe>> GetRecipes(Guid userId, CancellationToken cancellationToken = default) =>
+        await recipeRepository.GetRecipes(userId, cancellationToken);
 
     private static async Task<RunResponse?> PollRunStatus(IThreadManager threadManager,
         RunResponse runResponse,
@@ -249,7 +257,7 @@ public class OpenAiRecipeService(IFileManager fileManager,
 
     private async Task NotifyErrorAndLog(string connectionId, string message, CancellationToken cancellationToken)
     {
-        await clientNotifier.NotifyError(connectionId, message, cancellationToken);
+        //await clientNotifier.NotifyError(connectionId, message, cancellationToken);
         logger.LogError(message);
     }
 }

@@ -11,6 +11,14 @@
       "type": "string",
       "description": "A short description of the recipe"
     },
+    "calories": {
+      "type": "number",
+      "description": "The total number of calories in the recipe i.e. sum of 'calories' in all categories"
+    },
+    "caloriesAfterSubstitution": {
+      "type": "number",
+      "description": "The total number of calories in the recipe after substitutions"
+    },
     "prepTime": {
       "type": "string",
       "description": "The preparation time for the recipe"
@@ -47,12 +55,42 @@
                 "name": {
                   "type": "string",
                   "description": "The name of the ingredient"
+                },
+                "calories": {
+                  "type": "number",
+                  "description": "The number of calories in the ingredient"
+                }
+              }
+            }
+          },
+          "calories": {
+            "type": "number",
+            "description": "The total number of calories in this category of ingredients"
+          },
+          "healthySubstitutions": {
+            "type": "array",
+            "description": "A list of healthy substitutions for ingredients in the recipe",
+            "items": {
+              "type": "object",
+              "properties": {
+                "original": {
+                  "type": "string",
+                  "description": "The original ingredient"
+                },
+                "substitute": {
+                  "type": "string",
+                  "description": "The healthy substitute for the original ingredient"
                 }
               },
+              "required": [ "original", "substitute" ]
             }
+          },
+          "caloriesAfterSubstitution": {
+            "type": "number",
+            "description": "The total number of calories in this category of ingredients after substitutions"
           }
         },
-        "required": [ "category", "items" ]
+        "required": [ "category", "items", "calories" ]
       }
     },
     "instructions": {
@@ -114,6 +152,7 @@
       "required": [
         "title",
         "description",
+        "calories",
         "prepTime",
         "cookTime",
         "totalTime",

@@ -13,6 +13,8 @@ namespace DepuChef.Api.Validators
                 .WithMessage("Image is too large.")
                 .Must(x => x!.ContentType.Contains("image"))
                 .WithMessage("File is not an image.");
+            RuleFor(x => x.UserId)
+                .NotEmpty();
             RuleFor(x => x.ConnectionId)
                 .NotEmpty();
         }

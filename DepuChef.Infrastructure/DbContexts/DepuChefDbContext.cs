@@ -10,6 +10,7 @@ public class DepuChefDbContext(DbContextOptions<DepuChefDbContext> options) : Db
 {
     public DbSet<User> Users { get; set; } = null!;
     public DbSet<RecipeProcess> RecipeProcesses { get; set; } = null!;
+    public DbSet<Recipe> Recipes { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -17,6 +18,7 @@ public class DepuChefDbContext(DbContextOptions<DepuChefDbContext> options) : Db
         modelBuilder.Entity<User>(user =>
         {
             user.HasKey(user => user.Id);
+            user.HasMany(user => user.Recipes).WithOne();
             user.Property(user => user.Email).IsRequired();
             user.Property(user => user.SubscriptionLevel)
             .HasConversion(
@@ -72,8 +74,10 @@ public class DepuChefDbContext(DbContextOptions<DepuChefDbContext> options) : Db
         modelBuilder.Entity<Ingredient>(ingredient =>
         {
             ingredient.Navigation(ingredient => ingredient.Items).AutoInclude();
+            ingredient.Navigation(ingredient => ingredient.HealthySubstitutions).AutoInclude();
             ingredient.HasKey(ingredient => ingredient.Id);
             ingredient.HasMany(ingredient => ingredient.Items).WithOne().IsRequired();
+            ingredient.HasMany(ingredient => ingredient.HealthySubstitutions).WithOne().IsRequired();
         });
 
         modelBuilder.Entity<RecipeProcess>(process =>

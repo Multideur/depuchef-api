@@ -22,6 +22,8 @@ public static class ApiV1
         app.MapGet("/recipe/{processId}", GetRecipeFromProcess)
             .RequireAuthorization();
 
+        app.MapGet("/recipe", GetUserRecipes);
+
         app.MapPost("/identity/register", RegisterUser)
             .RequireAuthorization();
 
@@ -61,6 +63,7 @@ public static class ApiV1
         var backgroundRecipeRequest = new BackgroundRecipeRequest
         {
             ConnectionId = recipeRequest.ConnectionId,
+            UserId = recipeRequest.UserId,
             Image = image,
             Stream = memoryStream
         };
@@ -89,7 +92,18 @@ public static class ApiV1
             Ingredients = recipe.Ingredients?.Select(r => new IngredientDto
             {
                 Category = r.Category,
-                Items = r.Items?.Select(i => i.Name).ToList()
+                Items = r.Items?.Select(i => new IngredientItemDto
+                {
+                    Name = i.Name,
+                    Calories = i.Calories,
+                }).ToList(),
+                Calories = r.Calories,
+                HealthySubstitutions = r.HealthySubstitutions?.Select(h => new HealthySubstitutionDto
+                {
+                    Original = h.Original,
+                    Substitute = h.Substitute
+                }).ToList(),
+                CaloriesAfterSubstitution = r.CaloriesAfterSubstitution
             }).ToList(),
             Instructions = recipe.Instructions?.Select(r => new InstructionDto
             {
@@ -106,10 +120,71 @@ public static class ApiV1
             PrepTime = recipe.PrepTime,
             Rating = recipe.Rating,
             Servings = recipe.Servings,
-            TotalTime = recipe.TotalTime
+            TotalTime = recipe.TotalTime,
+            Calories = recipe.Calories,
+            CaloriesAfterSubstitution = recipe.CaloriesAfterSubstitution
         };
 
         return Results.Ok(recipeResponse);
+    }
+
+    private static async Task<IResult> GetUserRecipes(
+         Guid userId,
+         IUserService userService,
+         IRecipeService recipeService,
+         CancellationToken cancellationToken)
+    {
+        var user = await userService.GetUser(userId, cancellationToken);
+        if (user == null)
+        {
+            return Results.NotFound();
+        }
+        var recipes = await recipeService.GetRecipes(userId, cancellationToken);
+        if (recipes == null)
+        {
+            return Results.NotFound();
+        }
+        var recipeResponses = recipes.Select(r => new RecipeResponse
+        {
+            Id = r.Id,
+            Title = r.Title,
+            Ingredients = r.Ingredients?.Select(i => new IngredientDto
+            {
+                Category = i.Category,
+                Items = i.Items?.Select(i => new IngredientItemDto
+                {
+                    Name = i.Name,
+                    Calories = i.Calories
+                }).ToList(),
+                Calories = i.Calories,
+                HealthySubstitutions = i.HealthySubstitutions?.Select(h => new HealthySubstitutionDto
+                {
+                    Original = h.Original,
+                    Substitute = h.Substitute
+                }).ToList(),
+                CaloriesAfterSubstitution = i.CaloriesAfterSubstitution
+            }).ToList(),
+            Instructions = r.Instructions?.Select(i => new InstructionDto
+            {
+                Step = i.Step,
+                Description = i.Description
+            }).ToList(),
+            Confidence = r.Confidence,
+            CookTime = r.CookTime,
+            Description = r.Description,
+            Notes = r.Notes?.Select(n => new NoteDto
+            {
+                Text = n.Text
+            }).ToList(),
+            PrepTime = r.PrepTime,
+            Rating = r.Rating,
+            Servings = r.Servings,
+            TotalTime = r.TotalTime,
+            Calories = r.Calories,
+            CaloriesAfterSubstitution = r.CaloriesAfterSubstitution
+        }).ToList();
+
+        return Results.Ok(recipeResponses);
     }
 
     private static async Task<IResult> RegisterUser(
@@ -155,7 +230,7 @@ public static class ApiV1
             var problemDetails = new ProblemDetails
             {
                 Title = "Invalid claim.",
-                Detail = ex.Message
+                Detail = ex.Message + $" {ex.ClaimType}"
             };
 
             return Results.BadRequest(problemDetails);
