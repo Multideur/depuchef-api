@@ -20,14 +20,18 @@ public static class ApiV1
             .WithOpenApi();
 
         app.MapGet("/recipe/{processId}", GetRecipeFromProcess)
+            .Produces<RecipeResponse>()
             .RequireAuthorization();
 
-        app.MapGet("/recipe", GetUserRecipes);
+        app.MapGet("/recipe", GetUserRecipes)
+            .Produces<List<RecipeResponse>>();
 
         app.MapPost("/identity/register", RegisterUser)
+            .Produces<UserResponse>()
             .RequireAuthorization();
 
         app.MapGet("/user/{id}", GetUser)
+            .Produces<UserResponse>()
             .RequireAuthorization();
 
         app.MapGet("/test", async (IRecipeService recipeService) =>
