@@ -13,7 +13,8 @@ public static class ServiceCollectionExtensions
         string connectionString
     ) => services
             .AddDbContext<DepuChefDbContext>(optionsBuilder =>
-                optionsBuilder.UseSqlServer(connectionString,
+                optionsBuilder.UseSqlServer(
+                    connectionString,
                     options => options.EnableRetryOnFailure())
             )
             .AddRepositories();

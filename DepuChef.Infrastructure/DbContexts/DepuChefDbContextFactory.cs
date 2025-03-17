@@ -9,7 +9,9 @@ public class DepuChefDbContextFactory : IDesignTimeDbContextFactory<DepuChefDbCo
     {
         var optionsBuilder = new DbContextOptionsBuilder<DepuChefDbContext>();
 
-        optionsBuilder.UseSqlServer("Server=database;Database=myApp;User=sa;Password=MyPassword1;TrustServerCertificate=True;");
+        optionsBuilder.UseSqlServer(
+            "Server=database;Database=myApp;User=sa;Password=MyPassword1;TrustServerCertificate=True;",
+            options => options.EnableRetryOnFailure());
 
         return new DepuChefDbContext(optionsBuilder.Options);
     }
