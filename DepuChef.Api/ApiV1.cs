@@ -87,7 +87,7 @@ public static class ApiV1
 
     private static async Task<IResult> GetRecipeFromProcess(
         Guid processId,
-        IAiRecipeService recipeService,
+        [FromServices] IAiRecipeService recipeService,
         CancellationToken cancellationToken)
     {
         var recipe = await recipeService.GetRecipeByProcessId(processId, cancellationToken);
@@ -141,8 +141,8 @@ public static class ApiV1
 
     private static async Task<IResult> GetUserRecipes(
          Guid userId,
-         IUserService userService,
-         IRecipeService recipeService,
+         [FromServices] IUserService userService,
+         [FromServices] IRecipeService recipeService,
          CancellationToken cancellationToken)
     {
         var user = await userService.GetUser(u => u.Id == userId, cancellationToken);
@@ -201,7 +201,7 @@ public static class ApiV1
     private static async Task<IResult> RegisterUser(
         [FromBody] RegisterUserRequest request,
         IValidator<RegisterUserRequest> validator,
-        IUserService userService,
+        [FromServices] IUserService userService,
         ILogger<RegisterUserRequest> logger,
         CancellationToken cancellationToken)
     {
@@ -266,7 +266,7 @@ public static class ApiV1
 
     private static async Task<IResult> GetUser(
         Guid id,
-        IUserService userService,
+        [FromServices] IUserService userService,
         CancellationToken cancellationToken)
     {
         var user = await userService.GetUser(u => u.Id == id, cancellationToken);
@@ -286,10 +286,11 @@ public static class ApiV1
         return Results.Ok(userResponse);
     }
 
-    private static async Task<IResult> UpdateUserRecipeFavourite(IRecipeService recipeService, 
+    private static async Task<IResult> UpdateUserRecipeFavourite(
+        [FromServices] IRecipeService recipeService, 
         Guid userId, 
         Guid recipeId,
-        UpdateFavouriteDto updateFavouriteDto,
+        [FromBody] UpdateFavouriteDto updateFavouriteDto,
         CancellationToken cancellationToken)
     {
         var result = await recipeService.UpdateRecipeFavourite(userId, 
