@@ -1,4 +1,5 @@
 ﻿using DepuChef.Application.Models;
+using DepuChef.Application.Services.OpenAi;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -34,7 +35,7 @@ public class RecipeRequestBackgroundService(
                     logger.LogInformation("Processing recipe request with ConnectionId: {connectionId}", recipeRequest.ConnectionId);
 
                     using var scope = serviceProvider.CreateScope();
-                    var recipeService = scope.ServiceProvider.GetRequiredService<IRecipeService>();
+                    var recipeService = scope.ServiceProvider.GetRequiredService<IAiRecipeService>();
                     await recipeService.CreateRecipeFromImage(recipeRequest, stoppingToken);
                 }
                 catch (Exception ex)

@@ -17,4 +17,5 @@ public class Recipe : AuditedModel
     public List<Note>? Notes { get; set; }
     public decimal Confidence { get; set; }
     public int? Rating { get; set; }
+    public bool IsFavourite { get; set; }
 }

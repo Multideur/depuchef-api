@@ -2,16 +2,16 @@
 using DepuChef.Application.Repositories;
 using DepuChef.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace DepuChef.Infrastructure.Repositories;
 
 public class ProcessRepository(DepuChefDbContext dbContext) : IProcessRepository
 {
-    public async Task<RecipeProcess?> GetRecipeProcessById(Guid id, CancellationToken cancellationToken = default) =>
-        await dbContext.RecipeProcesses.SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
-
-    public async Task<RecipeProcess?> GetRecipeProcessByThreadId(string threadId, CancellationToken cancellationToken = default) => 
-        await dbContext.RecipeProcesses.SingleOrDefaultAsync(x => x.ThreadId == threadId, cancellationToken);
+    public async Task<RecipeProcess?> GetRecipeProcess(
+        Expression<Func<RecipeProcess, bool>> predicate, 
+        CancellationToken cancellationToken = default) =>
+        await dbContext.RecipeProcesses.SingleOrDefaultAsync(predicate, cancellationToken);
 
     public async Task<RecipeProcess?> SaveRecipeProcess(RecipeProcess recipeProcess, CancellationToken cancellationToken = default)
     {

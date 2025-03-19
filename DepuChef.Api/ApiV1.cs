@@ -4,6 +4,7 @@ using DepuChef.Application.Exceptions;
 using DepuChef.Application.Models;
 using DepuChef.Application.Models.User;
 using DepuChef.Application.Services;
+using DepuChef.Application.Services.OpenAi;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,28 +14,34 @@ public static class ApiV1
 {
     public static void AddEndpoints(this WebApplication app)
     {
-        app.MapPost("/recipe/create", CreateRecipeFromImage)
+        var recipeRoute = app.MapGroup("/recipe");
+        recipeRoute.MapPost("/create", CreateRecipeFromImage)
             .RequireAuthorization()
             .DisableAntiforgery()
             .WithName("GenerateRecipe")
             .WithOpenApi();
 
-        app.MapGet("/recipe/{processId}", GetRecipeFromProcess)
+        recipeRoute.MapGet("/{processId}", GetRecipeFromProcess)
             .Produces<RecipeResponse>()
             .RequireAuthorization();
 
-        app.MapGet("/recipe", GetUserRecipes)
-            .Produces<List<RecipeResponse>>();
-
-        app.MapPost("/identity/register", RegisterUser)
+        var userRoute = app.MapGroup("/user");
+        userRoute.MapPost("/register", RegisterUser)
             .Produces<UserResponse>()
             .RequireAuthorization();
 
-        app.MapGet("/user/{id}", GetUser)
+        userRoute.MapGet("/{id}", GetUser)
             .Produces<UserResponse>()
             .RequireAuthorization();
 
-        app.MapGet("/test", async (IRecipeService recipeService) =>
+        userRoute.MapGet("/{userId}/recipe", GetUserRecipes)
+            .Produces<List<RecipeResponse>>()
+            .RequireAuthorization();
+
+        userRoute.MapPatch("/{userId}/recipe/{recipeId}", UpdateUserRecipeFavourite)
+            .RequireAuthorization();
+
+        app.MapGet("/test", async (IAiRecipeService recipeService) =>
         {
             var recipe = await recipeService.GetRecipeByProcessId(Guid.NewGuid(), CancellationToken.None);
             Console.WriteLine("This is a test log. Depuchef");
@@ -80,7 +87,7 @@ public static class ApiV1
 
     private static async Task<IResult> GetRecipeFromProcess(
         Guid processId,
-        IRecipeService recipeService,
+        IAiRecipeService recipeService,
         CancellationToken cancellationToken)
     {
         var recipe = await recipeService.GetRecipeByProcessId(processId, cancellationToken);
@@ -138,7 +145,7 @@ public static class ApiV1
          IRecipeService recipeService,
          CancellationToken cancellationToken)
     {
-        var user = await userService.GetUser(userId, cancellationToken);
+        var user = await userService.GetUser(u => u.Id == userId, cancellationToken);
         if (user == null)
         {
             return Results.NotFound();
@@ -262,7 +269,7 @@ public static class ApiV1
         IUserService userService,
         CancellationToken cancellationToken)
     {
-        var user = await userService.GetUser(id, cancellationToken);
+        var user = await userService.GetUser(u => u.Id == id, cancellationToken);
         if (user == null)
         {
             return Results.NotFound();
@@ -277,6 +284,24 @@ public static class ApiV1
             ChefPreference = user.ChefPreference
         };
         return Results.Ok(userResponse);
+    }
+
+    private static async Task<IResult> UpdateUserRecipeFavourite(IRecipeService recipeService, 
+        Guid userId, 
+        Guid recipeId,
+        UpdateFavouriteDto updateFavouriteDto,
+        CancellationToken cancellationToken)
+    {
+        var result = await recipeService.UpdateRecipeFavourite(userId, 
+            recipeId,
+            updateFavouriteDto.IsFavourite,
+            cancellationToken);
+
+        if (result == null)
+        {
+            return Results.NotFound();
+        }
+        return Results.Ok();
     }
 
     private static void LogCollectionValues<T>(ICollection<string[]> collection, ILogger<T> logger)

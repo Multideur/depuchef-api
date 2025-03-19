@@ -1,11 +1,9 @@
 ﻿using DepuChef.Application.Models;
 
-namespace DepuChef.Application.Services
+namespace DepuChef.Application.Services;
+
+public interface IRecipeService
 {
-    public interface IRecipeService
-    {
-        Task CreateRecipeFromImage(BackgroundRecipeRequest recipeRequest, CancellationToken cancellationToken);
-        Task<Recipe?> GetRecipeByProcessId(Guid processId, CancellationToken cancellationToken);
-        Task<IList<Recipe>> GetRecipes(Guid userId, CancellationToken cancellationToken);
-    }
+    Task<IList<Recipe>> GetRecipes(Guid userId, CancellationToken cancellationToken);
+    Task<Recipe?> UpdateRecipeFavourite(Guid userId, Guid recipeId, bool isFavourite, CancellationToken cancellationToken);
 }

@@ -31,7 +31,7 @@ services.AddScoped<ICleanUpService, CleanUpService>();
 services.AddScoped<IFileManager, FileManager>();
 services.AddScoped<IMessageManager, MessageManager>();
 services.AddScoped<IThreadManager, ThreadManager>();
-services.AddScoped<IRecipeService, OpenAiRecipeService>();
+services.AddScoped<IAiRecipeService, OpenAiRecipeService>();
 services.AddScoped<IUserService, UserService>();
 services.AddScoped<IHttpService, HttpService>();
 services.AddScoped<IClientNotifier, ClientNotifier>();

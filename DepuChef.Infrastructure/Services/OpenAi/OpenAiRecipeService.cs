@@ -22,7 +22,7 @@ public class OpenAiRecipeService(IFileManager fileManager,
     IProcessRepository processRepository,
     IRecipeRepository recipeRepository,
     IOptions<OpenAiOptions> options,
-    ILogger<OpenAiRecipeService> logger) : IRecipeService
+    ILogger<OpenAiRecipeService> logger) : IAiRecipeService
 {
     private readonly OpenAiOptions _openAiOptions = options.Value;
     private readonly JsonSerializerOptions _jsonSerializerOptions = new()
@@ -42,13 +42,13 @@ public class OpenAiRecipeService(IFileManager fileManager,
 
             if (recipeRequest.Image is null)
             {
-                await NotifyErrorAndLog(recipeRequest.ConnectionId, "Image is required", cancellationToken);
+                logger.LogError("Image is required.");
                 return;
             }
 
             if (recipeRequest.Stream is null)
             {
-                await NotifyErrorAndLog(recipeRequest.ConnectionId, "Stream is required", cancellationToken);
+                logger.LogError("Stream is required.");
                 return;
             }
 
@@ -65,7 +65,7 @@ public class OpenAiRecipeService(IFileManager fileManager,
             var fileUploadResponse = await UploadFile(fileUploadRequest, cancellationToken);
             if (fileUploadResponse is null || fileUploadResponse.Id is null)
             {
-                await NotifyErrorAndLog(recipeRequest.ConnectionId, "Failed to upload file", cancellationToken);
+                logger.LogError("Failed to upload file.");
                 return;
             }
 
@@ -75,7 +75,7 @@ public class OpenAiRecipeService(IFileManager fileManager,
             var runResponse = await threadManager.CreateThreadAndRun(threadRequest, cancellationToken);
             if (runResponse is null || runResponse.ThreadId is null || runResponse.Id is null)
             {
-                await NotifyErrorAndLog(recipeRequest.ConnectionId, "Failed to create run", cancellationToken);
+                logger.LogError("Failed to create run");
                 return;
             }
 
@@ -85,7 +85,7 @@ public class OpenAiRecipeService(IFileManager fileManager,
 
             if (runStatusResponse is null || runStatusResponse.Status is null)
             {
-                await NotifyErrorAndLog(recipeRequest.ConnectionId, "Failed to get run status", cancellationToken);
+                logger.LogError("Failed to get run status");
                 return;
             }
 
@@ -106,7 +106,7 @@ public class OpenAiRecipeService(IFileManager fileManager,
             if (recipeProcess is null)
             {
                 logger.LogError($"Failed to save recipe process for {{{LogToken.ThreadId}}}", runResponse.ThreadId);
-                await NotifyErrorAndLog(recipeRequest.ConnectionId, "Failed to save recipe process", cancellationToken);
+                logger.LogError("Failed to save recipe process");
                 return;
             }
 
@@ -117,14 +117,13 @@ public class OpenAiRecipeService(IFileManager fileManager,
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to create recipe from image");
-            await NotifyErrorAndLog(recipeRequest.ConnectionId!, $"Failed to create recipe from image. \nError: ${ex.Message}", cancellationToken);
             throw;
         }
     }
 
     public async Task<Recipe?> GetRecipeByProcessId(Guid processId, CancellationToken cancellationToken = default)
     {
-        var process = await processRepository.GetRecipeProcessById(processId, cancellationToken);
+        var process = await processRepository.GetRecipeProcess(x => x.Id == processId, cancellationToken);
         if (process is null)
         {
             logger.LogWarning($"No recipe process found for process {{{LogToken.RecipeProcessId}}}.", processId);
@@ -173,9 +172,6 @@ public class OpenAiRecipeService(IFileManager fileManager,
 
         return savedRecipe;
     }
-
-    public async Task<IList<Recipe>> GetRecipes(Guid userId, CancellationToken cancellationToken = default) =>
-        await recipeRepository.GetRecipes(userId, cancellationToken);
 
     private static async Task<RunResponse?> PollRunStatus(IThreadManager threadManager,
         RunResponse runResponse,
@@ -239,7 +235,7 @@ public class OpenAiRecipeService(IFileManager fileManager,
     private async Task CleanUp(string threadId,
         CancellationToken cancellationToken)
     {
-        var process = await processRepository.GetRecipeProcessByThreadId(threadId, cancellationToken);
+        var process = await processRepository.GetRecipeProcess(x => x.ThreadId == threadId, cancellationToken);
         if (process is null)
         {
             logger.LogWarning($"No process found for thread {{{LogToken.ThreadId}}}.", threadId);
@@ -253,11 +249,5 @@ public class OpenAiRecipeService(IFileManager fileManager,
         };
 
         await cleanUpService.CleanUp(cleanUpRequest, cancellationToken);
-    }
-
-    private async Task NotifyErrorAndLog(string connectionId, string message, CancellationToken cancellationToken)
-    {
-        //await clientNotifier.NotifyError(connectionId, message, cancellationToken);
-        logger.LogError(message);
     }
 }

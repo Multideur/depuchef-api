@@ -3,6 +3,7 @@ using DepuChef.Application.Exceptions;
 using DepuChef.Application.Models.User;
 using DepuChef.Application.Repositories;
 using DepuChef.Application.Utilities;
+using System.Linq.Expressions;
 
 namespace DepuChef.Application.Services;
 
@@ -23,7 +24,7 @@ public class UserService(
             throw new InvalidClaimException("Claim does not match property", ClaimType.Email);
         }
 
-        var existingUser = await GetUser(request.Email, cancellationToken);
+        var existingUser = await GetUser(user => user.Email == request.Email, cancellationToken);
         if (existingUser != null)
         {
             if (existingUser.AuthUserId != authUserId)
@@ -47,22 +48,12 @@ public class UserService(
         return await userRepository.Add(user, cancellationToken);
     }
 
-    public async Task<User?> GetUser(string email, CancellationToken cancellationToken)
+    public async Task<User?> GetUser(Expression<Func<User, bool>> expression, CancellationToken cancellationToken)
     {
         CheckClaims(claimsHelper, out string? authUserId, out _);
-        var user = await userRepository.GetUser(email, cancellationToken);
+        var user = await userRepository.GetUser(expression, cancellationToken);
 
         return user; ;
-    }
-
-    public async Task<User?> GetUser(Guid id, CancellationToken cancellationToken)
-    {
-        CheckClaims(claimsHelper, out string? authUserId, out _);
-        var user = await userRepository.GetUser(id, cancellationToken);
-
-        return user?.AuthUserId != authUserId 
-            ? throw new InvalidOperationException("User not found or mismatched.") 
-            : user;
     }
 
     private static void CheckClaims(IClaimsHelper claimsHelper, out string? authUserId, out string? emailClaim)

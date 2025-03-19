@@ -1,5 +1,6 @@
 ﻿using DepuChef.Application.Models;
 using DepuChef.Application.Services;
+using DepuChef.Application.Services.OpenAi;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -10,7 +11,7 @@ namespace DepuChef.Application.Tests.Services;
 public class RecipeRequestBackgroundServiceTests
 {
     private const int MillisecondsDelay = 500;
-    private readonly Mock<IRecipeService> _mockRecipeService = new();
+    private readonly Mock<IAiRecipeService> _mockRecipeService = new();
     private readonly IServiceProvider _serviceProvider;
     private readonly Channel<BackgroundRecipeRequest> _requestChannel = Channel.CreateUnbounded<BackgroundRecipeRequest>();
     private readonly Mock<ILogger<RecipeRequestBackgroundService>> _mockLogger = new();

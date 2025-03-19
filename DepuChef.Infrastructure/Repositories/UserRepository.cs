@@ -2,6 +2,7 @@
 using DepuChef.Application.Repositories;
 using DepuChef.Infrastructure.DbContexts;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace DepuChef.Infrastructure.Repositories;
 
@@ -14,8 +15,8 @@ public class UserRepository(DepuChefDbContext databaseContext) : IUserRepository
         return entityEntry.Entity;
     }
 
-    public async Task<User?> GetUser(string email, CancellationToken cancellationToken) => 
-        await databaseContext.Users.SingleOrDefaultAsync(user => user.Email == email, cancellationToken);
+    public async Task<User?> GetUser(Expression<Func<User, bool>> predicate, CancellationToken cancellationToken) => 
+        await databaseContext.Users.SingleOrDefaultAsync(predicate, cancellationToken);
 
     public async Task<User?> GetUser(Guid id, CancellationToken cancellationToken) => 
         await databaseContext.Users.SingleOrDefaultAsync(user => user.Id == id, cancellationToken);
