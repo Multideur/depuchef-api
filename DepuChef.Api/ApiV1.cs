@@ -48,7 +48,7 @@ public static class ApiV1
 
     private static async Task<IResult> CreateRecipeFromImage(
         [FromForm] RecipeRequest recipeRequest,
-        [FromServices] IRecipeRequestBackgroundService backgroundService,
+        IRecipeRequestBackgroundService backgroundService,
         IValidator<RecipeRequest> validator,
         ILogger<RecipeRequest> logger,
         CancellationToken cancellationToken)
@@ -83,7 +83,7 @@ public static class ApiV1
 
     private static async Task<IResult> GetRecipeFromProcess(
         Guid processId,
-        [FromServices] IAiRecipeService recipeService,
+        IAiRecipeService recipeService,
         CancellationToken cancellationToken)
     {
         var recipe = await recipeService.GetRecipeByProcessId(processId, cancellationToken);
@@ -137,8 +137,8 @@ public static class ApiV1
 
     private static async Task<IResult> GetUserRecipes(
          Guid userId,
-         [FromServices] IUserService userService,
-         [FromServices] IRecipeService recipeService,
+         IUserService userService,
+         IRecipeService recipeService,
          CancellationToken cancellationToken)
     {
         var user = await userService.GetUser(u => u.Id == userId, cancellationToken);
@@ -197,7 +197,7 @@ public static class ApiV1
     private static async Task<IResult> RegisterUser(
         [FromBody] RegisterUserRequest request,
         IValidator<RegisterUserRequest> validator,
-        [FromServices] IUserService userService,
+        IUserService userService,
         ILogger<RegisterUserRequest> logger,
         CancellationToken cancellationToken)
     {
@@ -264,7 +264,7 @@ public static class ApiV1
     private static async Task<IResult> UpdateUser(
         Guid id,
         [FromBody] UpdateUserRequest request,
-        [FromServices] IUserService userService,
+        IUserService userService,
         ILogger<UpdateUserRequest> logger,
         CancellationToken cancellationToken)
     {        
@@ -286,7 +286,7 @@ public static class ApiV1
 
     private static async Task<IResult> GetUser(
         Guid id,
-        [FromServices] IUserService userService,
+        IUserService userService,
         CancellationToken cancellationToken)
     {
         var user = await userService.GetUser(u => u.Id == id, cancellationToken);
@@ -308,7 +308,7 @@ public static class ApiV1
     }
 
     private static async Task<IResult> UpdateUserRecipeFavourite(
-        [FromServices] IRecipeService recipeService, 
+        IRecipeService recipeService, 
         Guid userId, 
         Guid recipeId,
         [FromBody] UpdateFavouriteDto updateFavouriteDto,

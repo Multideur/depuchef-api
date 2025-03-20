@@ -32,6 +32,7 @@ services.AddScoped<IFileManager, FileManager>();
 services.AddScoped<IMessageManager, MessageManager>();
 services.AddScoped<IThreadManager, ThreadManager>();
 services.AddScoped<IAiRecipeService, OpenAiRecipeService>();
+services.AddScoped<IRecipeService, RecipeService>();
 services.AddScoped<IUserService, UserService>();
 services.AddScoped<IHttpService, HttpService>();
 services.AddScoped<IClientNotifier, ClientNotifier>();
