@@ -8,4 +8,5 @@ public interface IUserRepository
     Task<User?> Add(User user, CancellationToken cancellationToken);
     Task<User?> GetUser(Expression<Func<User, bool>> expression, CancellationToken cancellationToken);
     Task<User?> GetUser(Guid id, CancellationToken cancellationToken);
+    Task Update(User user, CancellationToken cancellationToken);
 }

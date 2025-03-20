@@ -30,6 +30,10 @@ public static class ApiV1
             .Produces<UserResponse>()
             .RequireAuthorization();
 
+        userRoute.MapPut("/{id}", UpdateUser)
+            .Produces<UserResponse>()
+            .RequireAuthorization();
+
         userRoute.MapGet("/{id}", GetUser)
             .Produces<UserResponse>()
             .RequireAuthorization();
@@ -229,6 +233,7 @@ public static class ApiV1
                 Email = result.Email,
                 FirstName = result.FirstName,
                 LastName = result.LastName,
+                VirtualCoins = result.VirtualCoins,
                 SubscriptionLevel = result.SubscriptionLevel,
                 ChefPreference = result.ChefPreference
             };
@@ -264,6 +269,29 @@ public static class ApiV1
         }
     }
 
+    private static async Task<IResult> UpdateUser(
+        Guid id,
+        [FromBody] UpdateUserRequest request,
+        [FromServices] IUserService userService,
+        ILogger<UpdateUserRequest> logger,
+        CancellationToken cancellationToken)
+    {        
+        var user = await userService.GetUser(u => u.Id == id, cancellationToken);
+        if (user == null)
+        {
+            return Results.NotFound();
+        }
+
+        user.FirstName = request.FirstName;
+        user.LastName = request.LastName;
+        user.ChefPreference = ChefChoice.FromValue(request.ChefPreference);
+        user.Email = request.Email;
+
+        await userService.UpdateUser(user, cancellationToken);
+
+        return Results.Ok();
+    }
+
     private static async Task<IResult> GetUser(
         Guid id,
         [FromServices] IUserService userService,
@@ -280,6 +308,7 @@ public static class ApiV1
             Email = user.Email,
             FirstName = user.FirstName,
             LastName = user.LastName,
+            VirtualCoins = user.VirtualCoins,
             SubscriptionLevel = user.SubscriptionLevel,
             ChefPreference = user.ChefPreference
         };

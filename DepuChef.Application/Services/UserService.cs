@@ -50,10 +50,22 @@ public class UserService(
 
     public async Task<User?> GetUser(Expression<Func<User, bool>> expression, CancellationToken cancellationToken)
     {
-        CheckClaims(claimsHelper, out string? authUserId, out _);
+        CheckClaims(claimsHelper, out string? _, out _);
         var user = await userRepository.GetUser(expression, cancellationToken);
 
         return user; ;
+    }
+
+    public async Task UpdateUser(User user, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(user);
+        CheckClaims(claimsHelper, out string? authUserId, out _);
+        if (user.AuthUserId != authUserId)
+        {
+            throw new InvalidOperationException("User does not have permission to update this user");
+        }
+
+        await userRepository.Update(user, cancellationToken);
     }
 
     private static void CheckClaims(IClaimsHelper claimsHelper, out string? authUserId, out string? emailClaim)

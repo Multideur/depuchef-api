@@ -8,6 +8,7 @@ public class UserResponse
     public string? Email { get; set; }
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
+    public int VirtualCoins { get; set; }
     public SubscriptionLevel? SubscriptionLevel { get; set; }
     public ChefChoice? ChefPreference { get; set; }
 }

@@ -9,6 +9,7 @@ public class User : AuditedModel
     public string? Email { get; set; }
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
+    public int VirtualCoins { get; set; }
     public ICollection<Recipe>? Recipes { get; set; }
     public required SubscriptionLevel SubscriptionLevel { get; set; }
     public required ChefChoice ChefPreference { get; set; }

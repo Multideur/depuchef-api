@@ -20,4 +20,10 @@ public class UserRepository(DepuChefDbContext databaseContext) : IUserRepository
 
     public async Task<User?> GetUser(Guid id, CancellationToken cancellationToken) => 
         await databaseContext.Users.SingleOrDefaultAsync(user => user.Id == id, cancellationToken);
+
+    public async Task Update(User user, CancellationToken cancellationToken)
+    {
+        databaseContext.Users.Update(user);
+        await databaseContext.SaveChangesAsync(cancellationToken);
+    }
 }
