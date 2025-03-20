@@ -44,14 +44,6 @@ public static class ApiV1
 
         userRoute.MapPatch("/{userId}/recipe/{recipeId}", UpdateUserRecipeFavourite)
             .RequireAuthorization();
-
-        app.MapGet("/test", async (IAiRecipeService recipeService) =>
-        {
-            var recipe = await recipeService.GetRecipeByProcessId(Guid.NewGuid(), CancellationToken.None);
-            Console.WriteLine("This is a test log. Depuchef");
-
-            return Results.Ok("Hello, World!");
-        });
     }
 
     private static async Task<IResult> CreateRecipeFromImage(
