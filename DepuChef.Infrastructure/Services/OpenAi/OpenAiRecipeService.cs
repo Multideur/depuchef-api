@@ -20,6 +20,7 @@ public class OpenAiRecipeService(IFileManager fileManager,
     ICleanUpService cleanUpService,
     IClientNotifier clientNotifier,
     IProcessRepository processRepository,
+    IUserRepository userRepository,
     IRecipeRepository recipeRepository,
     IOptions<OpenAiOptions> options,
     ILogger<OpenAiRecipeService> logger) : IAiRecipeService
@@ -109,6 +110,16 @@ public class OpenAiRecipeService(IFileManager fileManager,
                 logger.LogError("Failed to save recipe process");
                 return;
             }
+
+            var user = await userRepository.GetUser(recipeRequest.UserId, cancellationToken);
+            if (user is null)
+            {
+                logger.LogError($"Failed to get user for UserId: {{{LogToken.UserId}}}", recipeRequest.UserId);
+                return;
+            }
+
+            user.VirtualCoins -= 5;
+            await userRepository.Update(user, cancellationToken);
 
             await clientNotifier.NotifyRecipeReady(recipeRequest.ConnectionId,
                 recipeProcess.Id.ToString(),

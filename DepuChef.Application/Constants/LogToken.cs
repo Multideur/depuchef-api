@@ -8,4 +8,8 @@ public class LogToken
     public const string RecipeProcessId = "RecipeProcessId";
     public const string FileId = "FileId";
     public const string Message = "Message";
+    public const string UserId = "UserId";
+    public const string ConnectionId = "ConnectionId";
+    public const string Email = "Email";
+    public const string ClaimType = "ClaimType";
 }

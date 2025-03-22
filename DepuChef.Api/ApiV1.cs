@@ -51,6 +51,7 @@ public static class ApiV1
     private static async Task<IResult> CreateRecipeFromImage(
         [FromForm] RecipeRequest recipeRequest,
         IRecipeRequestBackgroundService backgroundService,
+        IUserService userService,
         IValidator<RecipeRequest> validator,
         ILogger<RecipeRequest> logger,
         CancellationToken cancellationToken)
@@ -64,6 +65,31 @@ public static class ApiV1
             LogCollectionValues(validationErrors.Values, logger);
             return Results.ValidationProblem(validationErrors);
         }
+
+        var user = await userService.GetUser(u => u.Id == recipeRequest.UserId, cancellationToken);
+
+        if (user == null)
+        {
+            logger.LogWarning($"User not found with Id: {{{LogToken.UserId}}}", recipeRequest.UserId);
+            var error = new ProblemDetails
+            {
+                Title = "User not found.",
+                Detail = "User not found."
+            };
+            return Results.NotFound(error);
+        }
+
+        if (user.VirtualCoins < 5)
+        {
+            logger.LogWarning($"Insufficient coins for user with Id: {{{LogToken.UserId}}}", recipeRequest.UserId);
+            var error = new ProblemDetails
+            {
+                Title = "Insufficient coins.",
+                Detail = "Insufficient coins."
+            };
+            return Results.BadRequest(error);
+        }
+
         var image = recipeRequest.Image;
         var memoryStream = new MemoryStream();
         await image!.CopyToAsync(memoryStream, cancellationToken);
@@ -77,7 +103,7 @@ public static class ApiV1
             Stream = memoryStream
         };
 
-        logger.LogInformation("Enqueuing recipe request with ConnectionId: {connectionId}", recipeRequest.ConnectionId);
+        logger.LogInformation($"Enqueuing recipe request with ConnectionId: {{{LogToken.ConnectionId}}}", recipeRequest.ConnectionId);
         backgroundService.EnqueueRecipeRequest(backgroundRecipeRequest);
 
         return Results.Ok();
@@ -205,7 +231,7 @@ public static class ApiV1
     {
         try
         {
-            logger.LogInformation("Registering user with email: {email}", request.Email);
+            logger.LogInformation($"Registering user with email: {{{LogToken.Email}}}", request.Email);
 
             var validationResult = await validator.ValidateAsync(request, cancellationToken);
             if (!validationResult.IsValid)
@@ -236,7 +262,7 @@ public static class ApiV1
         }
         catch (InvalidClaimException ex)
         {
-            logger.LogError(ex, "Invalid claim exception. Claim type: {claimType}", ex.ClaimType);
+            logger.LogError(ex, $"Invalid claim exception. Claim type: {{{LogToken.ClaimType}}}", ex.ClaimType);
             var problemDetails = new ProblemDetails
             {
                 Title = "Invalid claim.",
