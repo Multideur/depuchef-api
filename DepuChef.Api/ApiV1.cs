@@ -16,6 +16,7 @@ public static class ApiV1
     {
         var recipeRoute = app.MapGroup("/recipe");
         recipeRoute.MapPost("/create", CreateRecipeFromImage)
+            .ProducesValidationProblem()
             .RequireAuthorization()
             .DisableAntiforgery()
             .WithName("GenerateRecipe")
@@ -28,6 +29,7 @@ public static class ApiV1
         var userRoute = app.MapGroup("/user");
         userRoute.MapPost("/register", RegisterUser)
             .Produces<UserResponse>()
+            .ProducesValidationProblem()
             .RequireAuthorization();
 
         userRoute.MapPut("/{id}", UpdateUser)
