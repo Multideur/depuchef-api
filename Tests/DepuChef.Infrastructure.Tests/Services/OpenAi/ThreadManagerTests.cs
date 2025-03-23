@@ -31,7 +31,6 @@ public class ThreadManagerTests
     [Fact]
     public async Task CreateThread_ReturnsThreadResponse()
     {
-        // Arrange
         const string assistantId = "assistantId";
         const string threadId = "threadId";
         var sut = CreateSut();
@@ -65,10 +64,8 @@ public class ThreadManagerTests
                 cancellationToken))
             .ReturnsAsync(response);
 
-        // Act
         var result = await sut.CreateThread(threadRequest, cancellationToken);
 
-        // Assert
         using var _ = new AssertionScope();
         result.Should().NotBeNull();
         result!.Id.Should().Be(threadId);
@@ -77,7 +74,6 @@ public class ThreadManagerTests
     [Fact]
     public async Task CreateRun_ReturnsRunResponse()
     {
-        // Arrange
         const string threadId = "threadId";
         const string runId = "runId";
         var sut = CreateSut();
@@ -101,10 +97,8 @@ public class ThreadManagerTests
                 cancellationToken))
             .ReturnsAsync(response);
 
-        // Act
         var result = await sut.CreateRun(runRequest, cancellationToken);
 
-        // Assert
         using var _ = new AssertionScope();
         result.Should().NotBeNull();
         result!.Id.Should().Be(runId);
@@ -113,7 +107,6 @@ public class ThreadManagerTests
     [Fact]
     public async Task CreateThreadAndRun_ReturnsRunResponse()
     {
-        // Arrange
         const string runId = "runId";
         var sut = CreateSut();
         var cancellationToken = new CancellationToken();
@@ -136,10 +129,8 @@ public class ThreadManagerTests
                 cancellationToken))
             .ReturnsAsync(response);
 
-        // Act
         var result = await sut.CreateThreadAndRun(threadRequest, cancellationToken);
 
-        // Assert
         using var _ = new AssertionScope();
         result.Should().NotBeNull();
         result!.Id.Should().Be(runId);
@@ -148,7 +139,6 @@ public class ThreadManagerTests
     [Fact]
     public async Task CheckRunStatus_ReturnsRunResponse()
     {
-        // Arrange
         const string runId = "runId";
         const string threadId = "threadId";
         var sut = CreateSut();
@@ -167,10 +157,8 @@ public class ThreadManagerTests
                 cancellationToken))
             .ReturnsAsync(response);
 
-        // Act
         var result = await sut.CheckRunStatus(threadId, runId, cancellationToken);
 
-        // Assert
         using var _ = new AssertionScope();
         result.Should().NotBeNull();
         result!.Id.Should().Be(runId);
@@ -179,7 +167,6 @@ public class ThreadManagerTests
     [Fact]
     public async Task DeleteThread_ReturnsDeleteThreadResponse()
     {
-        // Arrange
         const string threadId = "threadId";
         var sut = CreateSut();
         var cancellationToken = new CancellationToken();
@@ -197,10 +184,8 @@ public class ThreadManagerTests
                 cancellationToken))
             .ReturnsAsync(response);
 
-        // Act
         var result = await sut.DeleteThread(threadId, cancellationToken);
 
-        // Assert
         using var _ = new AssertionScope();
         result.Should().NotBeNull();
         result!.Id.Should().Be(threadId);

@@ -32,7 +32,6 @@ public class MessageManagerTests
     [Fact]
     public async Task GetMessages_ShouldReturnMessages()
     {
-        // Arrange
         const string messageId = "messageId";
         const string threadId = "threadId";
         var sut = CreateSut();
@@ -68,10 +67,8 @@ public class MessageManagerTests
         _mockHttpService.Setup(x => x.GetAsync(It.IsAny<string>(), null, cancellationToken))
             .ReturnsAsync(response);
 
-        // Act
         var messages = await sut.GetMessages(threadId, cancellationToken);
 
-        // Assert
         using var _ = new AssertionScope();
         messages.Should().NotBeNull();
         messages.Should().HaveCount(1);

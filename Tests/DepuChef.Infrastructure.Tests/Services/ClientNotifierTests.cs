@@ -16,7 +16,6 @@ public class ClientNotifierTests
     [Fact]
     public async Task NotifyRecipeReady_ShouldNotifyClient()
     {
-        // Arrange
         var sut = CreateSut();
         var clientId = "clientId";
         var message = "message";
@@ -29,11 +28,7 @@ public class ClientNotifierTests
 
         _mockHubContext.Setup(x => x.Clients)
             .Returns(mockHubClients.Object);
-
-        // Act
         await sut.NotifyRecipeReady(clientId, message, default);
-
-        // Assert
         _mockClientProxy.Verify(x => x.SendCoreAsync(method, new object[1] { message }, default));
     }
 

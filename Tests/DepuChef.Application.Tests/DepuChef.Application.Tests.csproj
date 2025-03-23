@@ -30,8 +30,4 @@
     <ProjectReference Include="..\..\DepuChef.Application\DepuChef.Application.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Services\OpenAi\" />
-  </ItemGroup>
-
 </Project>

@@ -30,7 +30,6 @@ public class CleanUpServiceTests
     [Fact]
     public async Task CleanUp_ShouldDeleteFile()
     {
-        // Arrange
         var sut = CreateSut();
         var fileId = "fileId";
         var threadId = "threadId";
@@ -46,17 +45,14 @@ public class CleanUpServiceTests
                 Deleted = true
             });
 
-        // Act
         await sut.CleanUp(cleanUpRequest, default);
 
-        // Assert
         _mockFileManager.Verify(x =>  x.DeleteFile(fileId, default));
     }
 
     [Fact]
     public async Task CleanUp_ShouldDeleteThread()
     {
-        // Arrange
         var sut = CreateSut();
         var fileId = "fileId";
         var threadId = "threadId";
@@ -78,10 +74,8 @@ public class CleanUpServiceTests
                 Deleted = true
             });
 
-        // Act
         await sut.CleanUp(cleanUpRequest, default);
 
-        // Assert
         _mockThreadManager.Verify(x => x.DeleteThread(threadId, default));
     }
 

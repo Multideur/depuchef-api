@@ -1,8 +1,10 @@
-﻿using DepuChef.Application.Models;
+﻿using DepuChef.Application.Constants;
+using DepuChef.Application.Models;
 using DepuChef.Application.Models.OpenAI;
 using DepuChef.Application.Models.OpenAI.CleanUp;
 using DepuChef.Application.Models.OpenAI.File;
 using DepuChef.Application.Models.OpenAI.Thread;
+using DepuChef.Application.Models.User;
 using DepuChef.Application.Repositories;
 using DepuChef.Application.Services;
 using DepuChef.Application.Services.OpenAi;
@@ -23,6 +25,7 @@ public class OpenAiRecipeServiceTests
     private readonly Mock<ICleanUpService> _mockCleanUpService = new();
     private readonly Mock<IClientNotifier> _mockClientNotifier = new();
     private readonly Mock<IProcessRepository> _mockProcessRepository = new();
+    private readonly Mock<IUserRepository> _mockUserRepository = new();
     private readonly Mock<IRecipeRepository> _mockRecipeRepository = new();
     private readonly Mock<IOptions<OpenAiOptions>> _mockOptions = new();
     private readonly Mock<ILogger<OpenAiRecipeService>> _mockLogger = new();
@@ -90,38 +93,87 @@ public class OpenAiRecipeServiceTests
     }
 
     [Fact]
-    public async Task CreateRecipeFromImage_WhenRunStatusCompleted_ShouldNotifyClient()
+    public async Task CreateRecipeFromImage_WhenRunStatusCompleted_ShouldSaveRecipeProcess()
     {
         // Arrange
         var sut = CreateSut();
         const string connectionId = "client Id";
         const string threadId = "threadId";
-
         var recipeRequest = new BackgroundRecipeRequest
         {
             Image = new FormFile(Stream.Null, 0, 0, "fileName", "fileName"),
             Stream = new MemoryStream(),
+            UserId = Guid.NewGuid(),
             ConnectionId = connectionId
         };
-
         _mockFileManager.Setup(x => x.UploadFile(It.IsAny<FileUploadRequest>(), default))
             .ReturnsAsync(new FileUploadResponse { Id = "fileId" });
-
         _mockThreadManager.Setup(x => x.CreateThreadAndRun(It.IsAny<ThreadRequest>(), default))
             .ReturnsAsync(new RunResponse { ThreadId = threadId, Id = "id" });
-
         _mockThreadManager.Setup(x => x.CheckRunStatus(threadId, "id", default))
             .ReturnsAsync(new RunResponse { Status = "completed" });
+        // Act
+        await sut.CreateRecipeFromImage(recipeRequest);
+
+        // Assert
+        _mockProcessRepository.Verify(x => x.SaveRecipeProcess(It.Is<RecipeProcess>(process =>
+                process.UserId == recipeRequest.UserId
+                && process.ThreadId == threadId),
+            default));
+    }
+
+    [Fact]
+    public async Task CreateRecipeFromImage_WhenRunStatusCompleted_UpdateUserVirtualCoins()
+    {
+        // Arrange
+        var sut = CreateSut();
+        const string connectionId = "client Id";
+        const string threadId = "threadId";
+        var recipeRequest = new BackgroundRecipeRequest
+        {
+            Image = new FormFile(Stream.Null, 0, 0, "fileName", "fileName"),
+            Stream = new MemoryStream(),
+            UserId = Guid.NewGuid(),
+            ConnectionId = connectionId
+        };
+        _mockFileManager.Setup(x => x.UploadFile(It.IsAny<FileUploadRequest>(), default))
+            .ReturnsAsync(new FileUploadResponse { Id = "fileId" });
+        _mockThreadManager.Setup(x => x.CreateThreadAndRun(It.IsAny<ThreadRequest>(), default))
+            .ReturnsAsync(new RunResponse { ThreadId = threadId, Id = "id" });
+        _mockThreadManager.Setup(x => x.CheckRunStatus(threadId, "id", default))
+            .ReturnsAsync(new RunResponse { Status = "completed" });
+
+        var recipeProcess = new RecipeProcess
+        {
+            UserId = recipeRequest.UserId,
+            FileId = "fileId",
+            ThreadId = threadId
+        };
+        _mockProcessRepository.Setup(x => x.SaveRecipeProcess(It.IsAny<RecipeProcess>(), default))
+            .ReturnsAsync(recipeProcess);
+
+        var user = new User 
+        {
+            Id = recipeRequest.UserId,
+            SubscriptionLevel = SubscriptionLevel.Free,
+            ChefPreference = ChefChoice.Michael,
+            VirtualCoins = 10
+        };
+        _mockUserRepository.Setup(x => x.GetUser(recipeRequest.UserId, default))
+            .ReturnsAsync(user);
 
         // Act
         await sut.CreateRecipeFromImage(recipeRequest);
 
         // Assert
-        _mockClientNotifier.Verify(x => x.NotifyRecipeReady(connectionId, threadId, default));
+        _mockUserRepository.Verify(x => x.Update(It.Is<User>(u =>
+                u.Id == recipeRequest.UserId
+                && u.VirtualCoins == 5),
+            default));
     }
 
     [Fact]
-    public async Task CreateRecipeFromImage_WhenRunStatusCompleted_ShouldCleanUp()
+    public async Task CreateRecipeFromImage_WhenRunStatusCompleted_ShouldNotifyClient()
     {
         // Arrange
         var sut = CreateSut();
@@ -145,13 +197,31 @@ public class OpenAiRecipeServiceTests
         _mockThreadManager.Setup(x => x.CheckRunStatus(threadId, "id", default))
             .ReturnsAsync(new RunResponse { Status = "completed" });
 
+        var recipeProcess = new RecipeProcess
+        {
+            UserId = recipeRequest.UserId,
+            FileId = "fileId",
+            ThreadId = threadId
+        };
+        _mockProcessRepository.Setup(x => x.SaveRecipeProcess(It.IsAny<RecipeProcess>(), default))
+            .ReturnsAsync(recipeProcess);
+
+        var user = new User
+        {
+            Id = recipeRequest.UserId,
+            SubscriptionLevel = SubscriptionLevel.Free,
+            ChefPreference = ChefChoice.Michael,
+            VirtualCoins = 10
+        };
+        _mockUserRepository.Setup(x => x.GetUser(recipeRequest.UserId, default))
+            .ReturnsAsync(user);
+
         // Act
         await sut.CreateRecipeFromImage(recipeRequest);
 
         // Assert
-        _mockCleanUpService.Verify(x => x.CleanUp(It.Is<CleanUpRequest>(request =>
-                request.FileId == fileId
-                && request.ThreadId == threadId),
+        _mockClientNotifier.Verify(x => x.NotifyRecipeReady(recipeRequest.ConnectionId, 
+            recipeProcess.Id.ToString(), 
             default));
     }
 
@@ -163,6 +233,7 @@ public class OpenAiRecipeServiceTests
             _mockCleanUpService.Object,
             _mockClientNotifier.Object,
             _mockProcessRepository.Object,
+            _mockUserRepository.Object,
             _mockRecipeRepository.Object,
             _mockOptions.Object,
             _mockLogger.Object

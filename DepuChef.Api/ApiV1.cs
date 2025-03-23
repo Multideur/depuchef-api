@@ -174,7 +174,7 @@ public static class ApiV1
         {
             return Results.NotFound();
         }
-        var recipes = await recipeService.GetRecipes(userId, cancellationToken);
+        var recipes = await recipeService.GetRecipesForUser(userId, cancellationToken);
         if (recipes == null)
         {
             return Results.NotFound();

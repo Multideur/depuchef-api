@@ -32,7 +32,6 @@ public class FileManagerTests
     [Fact]
     public async Task UploadFile_ShouldReturnFileUploadResponse()
     {
-        // Arrange
         var sut = CreateSut();
         var file = new FormFile(Stream.Null, 0, 0, "fileName", "fileName")
         {
@@ -64,10 +63,8 @@ public class FileManagerTests
                 default))
             .ReturnsAsync(response);
 
-        // Act
         var result = await sut.UploadFile(fileUploadRequest, default);
 
-        // Assert
         using var _ = new AssertionScope();
         result.Should().NotBeNull();
         result!.Id.Should().Be("fileId");
@@ -76,7 +73,6 @@ public class FileManagerTests
     [Fact]
     public async Task UploadFile_WhenResponseIsNotSuccessful_ShouldThrowException()
     {
-        // Arrange
         var sut = CreateSut();
         var file = new FormFile(Stream.Null, 0, 0, "fileName", "fileName");
         var fileUploadRequest = new FileUploadRequest
@@ -97,17 +93,14 @@ public class FileManagerTests
                 default))
             .ReturnsAsync(response);
 
-        // Act
         Func<Task> act = async () => await sut.UploadFile(fileUploadRequest, default);
 
-        // Assert
         await act.Should().ThrowAsync<Exception>();
     }
 
     [Fact]
     public async Task DeleteFile_ShouldReturnFileDeleteResponse()
     {
-        // Arrange
         var sut = CreateSut();
         var fileId = "fileId";
 
@@ -124,10 +117,8 @@ public class FileManagerTests
             .Setup(x => x.DeleteAsync(It.IsAny<string>(), null, default))
             .ReturnsAsync(response);
 
-        // Act
         var result = await sut.DeleteFile(fileId, default);
 
-        // Assert
         using var _ = new AssertionScope();
         result.Should().NotBeNull();
         result!.Id.Should().Be(fileId);
@@ -136,7 +127,6 @@ public class FileManagerTests
     [Fact]
     public async Task DeleteFile_WhenResponseIsNotSuccessful_ShouldReturnNull()
     {
-        // Arrange
         var sut = CreateSut();
         var fileId = "fileId";
 
@@ -149,10 +139,8 @@ public class FileManagerTests
             .Setup(x => x.DeleteAsync(It.IsAny<string>(), null, default))
             .ReturnsAsync(response);
 
-        // Act
         var result = await sut.DeleteFile(fileId, default);
 
-        // Assert
         result.Should().BeNull();
     }
 
