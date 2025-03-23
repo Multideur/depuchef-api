@@ -1,6 +1,7 @@
 using DepuChef.Api;
 using DepuChef.Api.Policies;
 using DepuChef.Api.Validators;
+using DepuChef.Application;
 using DepuChef.Application.Models;
 using DepuChef.Application.Models.OpenAI;
 using DepuChef.Application.Services;
@@ -38,6 +39,7 @@ services.AddScoped<IHttpService, HttpService>();
 services.AddScoped<IClientNotifier, ClientNotifier>();
 services.AddScoped<IJsonFileReader, JsonFileReader>();
 services.AddScoped<IClaimsHelper, ClaimsHelper>();
+services.AddScoped<IStorageService, AzureStorageService>();
 services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 services.AddSingleton(Channel.CreateUnbounded<BackgroundRecipeRequest>());
 services.AddSingleton<IRecipeRequestBackgroundService>(provider =>
@@ -51,6 +53,8 @@ services.AddHostedService(provider =>
     (RecipeRequestBackgroundService)provider.GetRequiredService<IRecipeRequestBackgroundService>());
 
 services.Configure<OpenAiOptions>(configuration.GetSection(OpenAiOptions.Options));
+services.Configure<StorageOptions>(configuration.GetSection(StorageOptions.Options));
+
 services.AddCors(options =>
 {
     options.AddDefaultPolicy(builder =>
