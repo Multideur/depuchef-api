@@ -1,4 +1,4 @@
-using DepuChef.Api;
+using DepuChef.Api.Extensions;
 using DepuChef.Api.Policies;
 using DepuChef.Api.Validators;
 using DepuChef.Application;
