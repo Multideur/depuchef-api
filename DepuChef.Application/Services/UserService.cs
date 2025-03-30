@@ -59,8 +59,8 @@ public class UserService(
     public async Task UpdateUser(User user, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(user);
-        CheckClaims(claimsHelper, out string? authUserId, out _);
-        if (user.AuthUserId != authUserId)
+        CheckClaims(claimsHelper, out string? authUserId, out string? emailClaim);
+        if (!Information.AdminUsers.Contains(emailClaim) && user.AuthUserId != authUserId)
         {
             throw new InvalidOperationException("User does not have permission to update this user");
         }
