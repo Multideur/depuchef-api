@@ -118,7 +118,6 @@ public static class UserEndpoints
         user.FirstName = request.FirstName;
         user.LastName = request.LastName;
         user.ChefPreference = ChefChoice.FromValue(request.ChefPreference);
-        user.Email = request.Email;
 
         await userService.UpdateUser(user, cancellationToken);
 
