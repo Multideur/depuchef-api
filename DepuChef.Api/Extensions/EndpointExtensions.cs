@@ -9,6 +9,6 @@ public static class EndpointExtensions
         app.MapRecipeEndpoints();
         app.MapUserEndpoints();
         app.MapAdminEndpoints();
-        app.MapInformationEndpoints();
+        app.MapAppInformationEndpoints();
     }
 }

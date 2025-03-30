@@ -16,7 +16,7 @@ public static class AdminEndpoints
         adminRoute.MapPost("/add-coins", AddCoins)
             .ProducesValidationProblem()
             .RequireAuthorization()
-            .WithName("CreateAdmin");
+            .WithName("AddCoins");
     }
 
     private static async Task<IResult> AddCoins(

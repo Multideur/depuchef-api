@@ -1,20 +1,24 @@
 ﻿using DepuChef.Application.Constants;
+using System.Collections.ObjectModel;
 
 namespace DepuChef.Api.Endpoints;
 
 public static class AppInformationEndpoints
 {
-    public static void MapInformationEndpoints(this WebApplication app)
+    public static void MapAppInformationEndpoints(this IEndpointRouteBuilder app)
     {
         app.MapGet("/app/information", () =>
         {
             var result = new AppInformation
             {
-                ChefChoices = ChefChoice.List,
-                SubscriptionLevels = SubscriptionLevel.List
+                ChefChoices = new ReadOnlyCollection<ChefChoice>([.. ChefChoice.List.Order()]),
+                SubscriptionLevels = new ReadOnlyCollection<SubscriptionLevel>([.. SubscriptionLevel.List.Order()])
             };
             return Results.Ok(result);
-        }).AllowAnonymous();
+        })
+            .WithName("GetAppInformation")
+            .Produces<AppInformation>()
+            .AllowAnonymous();
     }
 }
 
