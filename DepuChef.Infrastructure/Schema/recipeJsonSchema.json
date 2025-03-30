@@ -153,6 +153,7 @@
         "title",
         "description",
         "calories",
+        "caloriesAfterSubstitution",
         "prepTime",
         "cookTime",
         "totalTime",
