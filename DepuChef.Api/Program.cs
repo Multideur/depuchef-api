@@ -1,4 +1,5 @@
 using DepuChef.Api.Extensions;
+using DepuChef.Api.Middleware;
 using DepuChef.Api.Policies;
 using DepuChef.Api.Validators;
 using DepuChef.Application;
@@ -23,7 +24,6 @@ var services = builder.Services;
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 services.AddEndpointsApiExplorer();
 services.AddSwaggerGen();
-var configuration = builder.Configuration;
 
 // Register Validators
 services.AddValidatorsFromAssemblyContaining<RegisterUserRequestValidator>();
@@ -52,6 +52,7 @@ services.AddSingleton<IRecipeRequestBackgroundService>(provider =>
 services.AddHostedService(provider =>
     (RecipeRequestBackgroundService)provider.GetRequiredService<IRecipeRequestBackgroundService>());
 
+var configuration = builder.Configuration;
 services.Configure<OpenAiOptions>(configuration.GetSection(OpenAiOptions.Options));
 services.Configure<StorageOptions>(configuration.GetSection(StorageOptions.Options));
 
@@ -67,6 +68,7 @@ services.AddCors(options =>
 });
 services.AddSignalR()
     .AddAzureSignalR();
+services.AddProblemDetails();
 
 var authority = configuration.GetSection("Authentication:Authority").Value;
 services
@@ -150,6 +152,7 @@ services.AddSwaggerGen(c =>
     });
 });
 
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -163,6 +166,8 @@ app.UseCors();
 app.UseHttpsRedirection();
 
 app.UseAuthentication().UseAuthorization();
+
+app.UseMiddleware<ExceptionHandlerMiddleware>();
 
 app.AddEndpoints();
 app.MapHub<NotificationHub>("/hub");
