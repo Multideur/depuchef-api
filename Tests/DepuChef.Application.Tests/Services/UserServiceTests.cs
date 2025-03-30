@@ -23,7 +23,7 @@ public class UserServiceTests
         var user = new User
         {
             Id = userId,
-            ChefPreference = ChefChoice.Aduke,
+            ChefPreference = ChefChoice.Femi,
             SubscriptionLevel = SubscriptionLevel.Free
         };
 
@@ -44,7 +44,7 @@ public class UserServiceTests
         var user = new User
         {
             Id = userId,
-            ChefPreference = ChefChoice.Aduke,
+            ChefPreference = ChefChoice.Femi,
             SubscriptionLevel = SubscriptionLevel.Free
         };
         _mockUserRepository.Setup(x => x.GetUser(u => u.Id == userId, default)).ReturnsAsync(user);
@@ -72,7 +72,7 @@ public class UserServiceTests
             FirstName = "Test",
             LastName = "User",
             Subscription = SubscriptionLevel.Free,
-            ChefPreference = ChefChoice.Aduke
+            ChefPreference = ChefChoice.Femi
         };
 
         var act = () => sut.RegisterUser(request, default);
@@ -93,7 +93,7 @@ public class UserServiceTests
             FirstName = "Test",
             LastName = "User",
             Subscription = SubscriptionLevel.Free,
-            ChefPreference = ChefChoice.Aduke
+            ChefPreference = ChefChoice.Femi
         };
 
         var claims = new List<Claim>
@@ -106,7 +106,7 @@ public class UserServiceTests
         var user = new User
         {
             Id = userId,
-            ChefPreference = ChefChoice.Aduke,
+            ChefPreference = ChefChoice.Femi,
             SubscriptionLevel = SubscriptionLevel.Free
         };
 
@@ -132,7 +132,7 @@ public class UserServiceTests
             FirstName = "Test",
             LastName = "User",
             Subscription = SubscriptionLevel.Free,
-            ChefPreference = ChefChoice.Aduke
+            ChefPreference = ChefChoice.Femi
         };
 
         var claims = new List<Claim>
@@ -148,7 +148,7 @@ public class UserServiceTests
             Email = email,
             FirstName = "Test",
             LastName = "User",
-            ChefPreference = ChefChoice.Aduke,
+            ChefPreference = ChefChoice.Femi,
             SubscriptionLevel = SubscriptionLevel.Free
         };
 
@@ -172,7 +172,7 @@ public class UserServiceTests
             FirstName = "Test",
             LastName = "User",
             Subscription = SubscriptionLevel.Free,
-            ChefPreference = ChefChoice.Aduke
+            ChefPreference = ChefChoice.Femi
         };
 
         var claims = new List<Claim>
@@ -189,7 +189,7 @@ public class UserServiceTests
             Email = email,
             FirstName = "Test",
             LastName = "User",
-            ChefPreference = ChefChoice.Aduke,
+            ChefPreference = ChefChoice.Femi,
             SubscriptionLevel = SubscriptionLevel.Free
         };
 
@@ -214,7 +214,7 @@ public class UserServiceTests
             FirstName = "Test",
             LastName = "User",
             SubscriptionLevel = SubscriptionLevel.Free,
-            ChefPreference = ChefChoice.Aduke
+            ChefPreference = ChefChoice.Femi
         };
 
         var claims = new List<Claim>
@@ -243,7 +243,7 @@ public class UserServiceTests
             FirstName = "Test",
             LastName = "User",
             SubscriptionLevel = SubscriptionLevel.Free,
-            ChefPreference = ChefChoice.Aduke
+            ChefPreference = ChefChoice.Femi
         };
 
         var claims = new List<Claim>

@@ -37,7 +37,7 @@ public class UserService(
 
         var user = new User
         {
-            ChefPreference = ChefChoice.FromValue(request.ChefPreference, ChefChoice.Aduke),
+            ChefPreference = ChefChoice.FromValue(request.ChefPreference, ChefChoice.Femi),
             AuthUserId = authUserId,
             Email = request.Email,
             FirstName = request.FirstName,

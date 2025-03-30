@@ -156,7 +156,7 @@ public class OpenAiRecipeServiceTests
         {
             Id = recipeRequest.UserId,
             SubscriptionLevel = SubscriptionLevel.Free,
-            ChefPreference = ChefChoice.Michael,
+            ChefPreference = ChefChoice.Tyler,
             VirtualCoins = 10
         };
         _mockUserRepository.Setup(x => x.GetUser(recipeRequest.UserId, default))
@@ -210,7 +210,7 @@ public class OpenAiRecipeServiceTests
         {
             Id = recipeRequest.UserId,
             SubscriptionLevel = SubscriptionLevel.Free,
-            ChefPreference = ChefChoice.Michael,
+            ChefPreference = ChefChoice.Tyler,
             VirtualCoins = 10
         };
         _mockUserRepository.Setup(x => x.GetUser(recipeRequest.UserId, default))

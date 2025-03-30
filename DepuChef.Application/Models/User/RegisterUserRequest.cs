@@ -8,6 +8,6 @@ public class RegisterUserRequest
     public string? FirstName  { get; set; }
     public string? LastName { get; set; }
     public string? ProfilePictureUrl { get; set; }
-    public int ChefPreference { get; set; } = ChefChoice.Aduke.Value;
+    public int ChefPreference { get; set; } = ChefChoice.Femi.Value;
     public int Subscription { get; set; } = SubscriptionLevel.Free.Value;
 }
