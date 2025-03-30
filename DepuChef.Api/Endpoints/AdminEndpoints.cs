@@ -16,7 +16,6 @@ public static class AdminEndpoints
         adminRoute.MapPost("/add-coins", AddCoins)
             .ProducesValidationProblem()
             .RequireAuthorization()
-            .DisableAntiforgery()
             .WithName("CreateAdmin");
     }
 
@@ -51,7 +50,12 @@ public static class AdminEndpoints
 
         user.VirtualCoins += request.Coins;
         await userService.UpdateUser(user, cancellationToken);
-        return Results.Ok();
+        return Results.Ok(
+            new 
+            {
+                user.Id,
+                Coins = user.VirtualCoins
+            });
     }
 
     private static void CheckClaims(IClaimsHelper claimsHelper, out string? authUserId, out string? emailClaim)
