@@ -132,6 +132,84 @@ public class OpenAiRecipeService(IFileManager fileManager,
         }
     }
 
+    public async Task CreateRecipeFromText(BackgroundRecipeRequest recipeRequest, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            if (recipeRequest.ConnectionId is null)
+            {
+                logger.LogError("ConnectionId is required. Cannot notify client.");
+                return;
+            }
+            if (string.IsNullOrWhiteSpace(recipeRequest.Text))
+            {
+                logger.LogError("Text is required.");
+                return;
+            }
+            var threadRequest = new ThreadRequest
+            {
+                AssistantId = _openAiOptions.AssistantId,
+                Thread = new AiThread
+                {
+                    Messages =
+                    [
+                        new Message
+                        {
+                            Role = "user",
+                            Content = [
+                            new ContentItem
+                            {
+                                Type = "text",
+                                Text = new Text
+                                {
+                                    Value = recipeRequest.Text
+                                }
+                            }]
+                        }
+                    ]
+                }
+            };
+            var runResponse = await threadManager.CreateThreadAndRun(threadRequest, cancellationToken);
+            if (runResponse is null || runResponse.ThreadId is null || runResponse.Id is null)
+            {
+                logger.LogError("Failed to create run");
+                return;
+            }
+            var runStatusResponse = await threadManager.CheckRunStatus(runResponse.ThreadId,
+                runResponse.Id,
+                cancellationToken);
+            if (runStatusResponse is null || runStatusResponse.Status is null)
+            {
+                logger.LogError("Failed to get run status");
+                return;
+            }
+            runStatusResponse = await PollRunStatus(threadManager,
+                runResponse,
+                runStatusResponse,
+                cancellationToken);
+            logger.LogInformation($"Run completed successfully with ThreadId: {{{LogToken.ThreadId}}}", runResponse.ThreadId);
+            var recipeProcess = await processRepository.SaveRecipeProcess(new RecipeProcess
+            {
+                ThreadId = runResponse.ThreadId,
+                UserId = recipeRequest.UserId
+            }, cancellationToken);
+            if (recipeProcess is null)
+            {
+                logger.LogError($"Failed to save recipe process for {{{LogToken.ThreadId}}}", runResponse.ThreadId);
+                logger.LogError("Failed to save recipe process");
+                return;
+            }
+            await clientNotifier.NotifyRecipeReady(recipeRequest.ConnectionId,
+                recipeProcess.Id.ToString(),
+                cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to create recipe from search");
+            throw;
+        }
+    }
+
     public async Task<Recipe?> GetRecipeByProcessId(Guid processId, CancellationToken cancellationToken = default)
     {
         var process = await processRepository.GetRecipeProcess(x => x.Id == processId, cancellationToken);

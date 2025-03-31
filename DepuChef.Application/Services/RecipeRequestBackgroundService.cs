@@ -36,7 +36,16 @@ public class RecipeRequestBackgroundService(
 
                     using var scope = serviceProvider.CreateScope();
                     var recipeService = scope.ServiceProvider.GetRequiredService<IAiRecipeService>();
-                    await recipeService.CreateRecipeFromImage(recipeRequest, stoppingToken);
+
+                    if (recipeRequest.Image != null)
+                    {
+                        await recipeService.CreateRecipeFromImage(recipeRequest, stoppingToken);
+                    }
+
+                    if (recipeRequest.Text != null)
+                    {
+                        await recipeService.CreateRecipeFromText(recipeRequest, stoppingToken); 
+                    }
                 }
                 catch (Exception ex)
                 {
