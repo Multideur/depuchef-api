@@ -14,7 +14,11 @@ public class CleanUpService(IFileManager fileManager,
     public async Task CleanUp(CleanUpRequest cleanUpRequest, CancellationToken cancellationToken)
     {
         logger.LogInformation("Clean up started.");
-        await DeleteFile(cleanUpRequest.FileId, cancellationToken);
+
+        if (!string.IsNullOrEmpty(cleanUpRequest.FileId))
+        {
+            await DeleteFile(cleanUpRequest.FileId, cancellationToken); 
+        }
         await DeleteThread(cleanUpRequest.ThreadId, cancellationToken);
     }
 

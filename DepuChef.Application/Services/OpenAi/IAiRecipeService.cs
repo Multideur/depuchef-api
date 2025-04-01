@@ -5,5 +5,6 @@ namespace DepuChef.Application.Services.OpenAi;
 public interface IAiRecipeService
 {
     Task CreateRecipeFromImage(BackgroundRecipeRequest recipeRequest, CancellationToken cancellationToken);
+    Task CreateRecipeFromText(BackgroundRecipeRequest recipeRequest, CancellationToken cancellationToken);
     Task<Recipe?> GetRecipeByProcessId(Guid processId, CancellationToken cancellationToken);
 }
