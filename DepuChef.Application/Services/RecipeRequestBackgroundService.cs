@@ -40,6 +40,7 @@ public class RecipeRequestBackgroundService(
                     if (recipeRequest.Image != null)
                     {
                         await recipeService.CreateRecipeFromImage(recipeRequest, stoppingToken);
+                        return;
                     }
 
                     if (recipeRequest.Text != null)

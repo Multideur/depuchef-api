@@ -86,7 +86,7 @@ public class OpenAiRecipeServiceTests
             x.CreateThreadAndRun(
                 It.Is<ThreadRequest>(request =>
                     request.AssistantId == AssistantId
-                    && request.Thread!.Messages![0].Content![0].ImageFile!.FileId == "fileId"
+                    && (request.Thread!.Messages![0].Content as ContentItem[])![0].ImageFile!.FileId == "fileId"
                     && request.Thread.Messages[0].Role == "user"
                 ),
                 default));

@@ -14,7 +14,7 @@ public static class RecipeEndpoints
     public static void MapRecipeEndpoints(this IEndpointRouteBuilder app)
     {
         var recipeRoute = app.MapGroup("/recipe");
-        recipeRoute.MapPost("/create", CreateRecipeFromImage)
+        recipeRoute.MapPost("/create", CreateRecipe)
             .ProducesValidationProblem()
             .RequireAuthorization()
             .DisableAntiforgery()
@@ -22,11 +22,11 @@ public static class RecipeEndpoints
             .WithOpenApi();
 
         recipeRoute.MapGet("/{processId}", GetRecipeFromProcess)
-            .Produces<RecipeResponse>()
-            .RequireAuthorization();
+            .RequireAuthorization()
+            .Produces<RecipeResponse>();
     }
 
-    private static async Task<IResult> CreateRecipeFromImage(
+    private static async Task<IResult> CreateRecipe(
         [FromForm] RecipeRequest recipeRequest,
         IRecipeRequestBackgroundService backgroundService,
         IUserService userService,
@@ -34,7 +34,7 @@ public static class RecipeEndpoints
         ILogger<RecipeRequest> logger,
         CancellationToken cancellationToken)
     {
-        logger.LogInformation("Creating recipe from image.");
+        logger.LogInformation("Creating recipe from image or text.");
 
         var validationResult = await validator.ValidateAsync(recipeRequest, cancellationToken);
         if (!validationResult.IsValid)
@@ -70,15 +70,19 @@ public static class RecipeEndpoints
 
         var image = recipeRequest.Image;
         var memoryStream = new MemoryStream();
-        await image!.CopyToAsync(memoryStream, cancellationToken);
-        memoryStream.Position = 0;
+        if (image != null)
+        {
+            await image!.CopyToAsync(memoryStream, cancellationToken);
+            memoryStream.Position = 0;
+        }
 
         var backgroundRecipeRequest = new BackgroundRecipeRequest
         {
             ConnectionId = recipeRequest.ConnectionId,
             UserId = recipeRequest.UserId,
             Image = image,
-            Stream = memoryStream
+            Stream = memoryStream,
+            Text = recipeRequest.Text,
         };
 
         logger.LogInformation($"Enqueuing recipe request with ConnectionId: {{{LogToken.ConnectionId}}}", recipeRequest.ConnectionId);

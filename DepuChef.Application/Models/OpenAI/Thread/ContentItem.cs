@@ -11,4 +11,6 @@ public class ContentItem
     public Text? Text { get; set; }
     [JsonPropertyName("image_file")]
     public ImageFileReference? ImageFile { get; set; }
+    [JsonPropertyName("image_url")]
+    public ImageFileReference? ImageUrl { get; set; }
 }

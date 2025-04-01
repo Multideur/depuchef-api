@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using DepuChef.Application.Converters;
 using DepuChef.Application.Models.OpenAI.Thread;
 
 namespace DepuChef.Application.Models.OpenAI.Message;
@@ -10,7 +11,8 @@ public class Message
     [JsonPropertyName("role")]
     public string? Role { get; set; }
     [JsonPropertyName("content")]
-    public ContentItem[]? Content { get; set; }
+    [JsonConverter(typeof(ContentConverter))]
+    public object? Content { get; set; }
     [JsonPropertyName("object")]
     public string? Object { get; set; }
     [JsonPropertyName("created_at")]

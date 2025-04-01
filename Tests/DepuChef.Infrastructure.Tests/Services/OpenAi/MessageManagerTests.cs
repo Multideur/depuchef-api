@@ -55,9 +55,10 @@ public class MessageManagerTests
                     {
                         Id = messageId,
                         ThreadId = threadId,
-                        Content = [
+                        Content = new ContentItem[]
+                        {
                             messageContent
-                        ],
+                        },
                         CreatedAt = 12345
                     }
                 ]
@@ -75,7 +76,8 @@ public class MessageManagerTests
         var message = messages![0];
         message.Id.Should().Be(messageId);
         message.ThreadId.Should().Be(threadId);
-        message.Content.Should().AllBeEquivalentTo(messageContent);
+        var content = message.Content as ContentItem[];
+        content.Should().AllBeEquivalentTo(messageContent);
     }
 
     private MessageManager CreateSut() =>

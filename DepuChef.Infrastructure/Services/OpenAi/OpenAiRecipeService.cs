@@ -156,15 +156,7 @@ public class OpenAiRecipeService(IFileManager fileManager,
                         new Message
                         {
                             Role = "user",
-                            Content = [
-                            new ContentItem
-                            {
-                                Type = "text",
-                                Text = new Text
-                                {
-                                    Value = recipeRequest.Text
-                                }
-                            }]
+                            Content = recipeRequest.Text
                         }
                     ]
                 }
@@ -227,9 +219,9 @@ public class OpenAiRecipeService(IFileManager fileManager,
             return null;
         }
 
-        var recipe = (messages
+        var recipe = ((messages
             .LastOrDefault(m => m.Role == "assistant")?
-            .Content?
+            .Content as ContentItem[] ?? [])
             .LastOrDefault(c => c.Type == "text")?
             .Text?
             .Value)
@@ -298,15 +290,16 @@ public class OpenAiRecipeService(IFileManager fileManager,
                     new Message
                     {
                         Role = "user",
-                        Content = [
-                        new ContentItem
+                        Content = new ContentItem[]
                         {
-                            Type = "image_file",
-                            ImageFile = new ImageFileReference
-                            {
-                                FileId = fileUploadResponse.Id
-                            }
-                        }]
+                            new() {
+                                Type = "image_file",
+                                ImageFile = new ImageFileReference
+                                {
+                                    FileId = fileUploadResponse.Id
+                                }
+                            } 
+                        }
                     }
                 ]
             }

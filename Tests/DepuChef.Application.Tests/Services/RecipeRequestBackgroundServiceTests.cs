@@ -1,6 +1,7 @@
 ﻿using DepuChef.Application.Models;
 using DepuChef.Application.Services;
 using DepuChef.Application.Services.OpenAi;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -25,14 +26,17 @@ public class RecipeRequestBackgroundServiceTests
     }
 
     [Fact]
-    public async Task EnqueueRecipeRequest_ShouldEnqueueRecipeRequest()
+    public async Task EnqueueRecipeRequestWithImage_ShouldCreateRecipe()
     {
-        // Arrange
-        var recipeRequest = new BackgroundRecipeRequest();
+        var recipeRequest = new BackgroundRecipeRequest
+        {
+            Image = new FormFile(Stream.Null, 0, 0, "fileName", "fileName"),
+            Stream = new MemoryStream(),
+            ConnectionId = "connectionId"
+        };
         var sut = CreateSut();
         var cancellationTokenSource = new CancellationTokenSource();
 
-        // Act
         sut.EnqueueRecipeRequest(recipeRequest);
         _ = sut.StartChannelListener(cancellationTokenSource.Token);
 
@@ -40,8 +44,26 @@ public class RecipeRequestBackgroundServiceTests
 
         cancellationTokenSource.Cancel();
 
-        // Assert
         _mockRecipeService.Verify(x => x.CreateRecipeFromImage(recipeRequest, cancellationTokenSource.Token));
+    }
+
+    [Fact]
+    public async Task EnqueueRecipeRequestWithText_ShouldCreateRecipe()
+    {
+        var recipeRequest = new BackgroundRecipeRequest
+        {
+            Text = "text",
+            ConnectionId = "connectionId"
+        };
+        var sut = CreateSut();
+        var cancellationTokenSource = new CancellationTokenSource();
+
+        sut.EnqueueRecipeRequest(recipeRequest);
+        _ = sut.StartChannelListener(cancellationTokenSource.Token);
+        await Task.Delay(MillisecondsDelay);
+        cancellationTokenSource.Cancel();
+
+        _mockRecipeService.Verify(x => x.CreateRecipeFromText(recipeRequest, cancellationTokenSource.Token));
     }
 
     private RecipeRequestBackgroundService CreateSut() =>
