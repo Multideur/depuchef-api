@@ -16,4 +16,5 @@ public class RecipeResponse
     public List<NoteDto>? Notes { get; set; }
     public decimal Confidence { get; set; }
     public int? Rating { get; set; }
+    public bool IsFavourite { get; set; }
 }

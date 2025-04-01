@@ -179,6 +179,7 @@ public static class UserEndpoints
         {
             Id = r.Id,
             Title = r.Title,
+            IsFavourite = r.IsFavourite,
             Ingredients = r.Ingredients?.Select(i => new IngredientDto
             {
                 Category = i.Category,
