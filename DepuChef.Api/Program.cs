@@ -155,7 +155,11 @@ services.AddSwaggerGen(c =>
         }
     });
 });
-
+services.AddLogging(options =>
+{
+    options.AddConsole();
+    options.AddSentry();
+});
 
 var app = builder.Build();
 
