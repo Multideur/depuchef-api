@@ -19,11 +19,14 @@ using Microsoft.OpenApi.Models;
 using System.Threading.Channels;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.WebHost.UseSentry(options =>
+{
+    options.Dsn = builder.Configuration.GetSection("Sentry:Dsn").Value;
+#if DEBUG
+    options.Debug = true;
+#endif
+});
 var services = builder.Services;
-
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-services.AddEndpointsApiExplorer();
-services.AddSwaggerGen();
 
 // Register Validators
 services.AddValidatorsFromAssemblyContaining<RegisterUserRequestValidator>();
@@ -116,9 +119,10 @@ var swaggerInfo = new OpenApiInfo
 {
     Version = "v1",
     Title = "Depuchef API",
-    Description = "Depuchef backend for mobile app"
+    Description = "Depuchef backend for mobile app",
 };
 
+services.AddEndpointsApiExplorer();
 services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc(swaggerInfo.Version, swaggerInfo);
