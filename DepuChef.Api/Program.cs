@@ -26,6 +26,9 @@ builder.WebHost.UseSentry(options =>
     options.Debug = true;
 #endif
 });
+
+builder.Logging.AddSentry();
+
 var services = builder.Services;
 
 // Register Validators
@@ -154,11 +157,6 @@ services.AddSwaggerGen(c =>
             []
         }
     });
-});
-services.AddLogging(options =>
-{
-    options.AddConsole();
-    options.AddSentry();
 });
 
 var app = builder.Build();

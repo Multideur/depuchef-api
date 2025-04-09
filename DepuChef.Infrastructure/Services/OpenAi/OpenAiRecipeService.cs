@@ -107,7 +107,6 @@ public class OpenAiRecipeService(IFileManager fileManager,
             if (recipeProcess is null)
             {
                 logger.LogError($"Failed to save recipe process for {{{LogToken.ThreadId}}}", runResponse.ThreadId);
-                logger.LogError("Failed to save recipe process");
                 return;
             }
 
@@ -331,5 +330,11 @@ public class OpenAiRecipeService(IFileManager fileManager,
         };
 
         await cleanUpService.CleanUp(cleanUpRequest, cancellationToken);
+    }
+
+    private async Task LogAndNotifyError(string clientId, string message, CancellationToken cancellationToken)
+    {
+        logger.LogError(message);
+        await clientNotifier.NotifyError(clientId, message, cancellationToken);
     }
 }
