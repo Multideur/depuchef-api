@@ -60,7 +60,7 @@ public static class AdminEndpoints
 
     private static void CheckClaims(IClaimsHelper claimsHelper, out string? authUserId, out string? emailClaim)
     {
-        var claims = claimsHelper.RetrieveClaims() ?? throw new Exception("Claims are required.");
+        var claims = claimsHelper.RetrieveClaimsFromToken() ?? throw new Exception("Claims are required.");
         authUserId = claims.SingleOrDefault(claim => claim.Type == ClaimType.Sub)?.Value;
         if (string.IsNullOrWhiteSpace(authUserId))
             throw new InvalidClaimException(ClaimType.Sub);

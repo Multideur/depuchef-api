@@ -4,5 +4,6 @@ namespace DepuChef.Application.Utilities;
 
 public interface IClaimsHelper
 {
-    IEnumerable<Claim> RetrieveClaims(string? token = null);
+    IEnumerable<Claim> RetrieveClaimsFromToken(string? token = null);
+    void CheckClaims(out string? authUserId, out string? emailClaim);
 }

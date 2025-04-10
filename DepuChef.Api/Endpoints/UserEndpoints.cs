@@ -6,6 +6,7 @@ using DepuChef.Application.Services;
 using DepuChef.Api.Utilities;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
+using DepuChef.Application.Utilities;
 
 namespace DepuChef.Api.Endpoints;
 
@@ -125,22 +126,12 @@ public static class UserEndpoints
     }
 
     private static async Task<IResult> GetUser(
-        Guid? id,
-        string? email,
+        IClaimsHelper claimsHelper,
         IUserService userService,
         CancellationToken cancellationToken)
     {
-        if (id == null && email == null)
-        {
-            var error = new ProblemDetails
-            {
-                Title = "Id or email required.",
-                Detail = "Id or email required."
-            };
-            return Results.BadRequest(error);
-        }
-
-        var user = await userService.GetUser(u => u.Id == id || u.Email == email,
+        claimsHelper.CheckClaims(out _, out var email);
+        var user = await userService.GetUser(u => u.Email == email,
             cancellationToken);
         if (user == null)
         {

@@ -17,7 +17,7 @@ public class UserService(
         ArgumentNullException.ThrowIfNull(request);
         ArgumentNullException.ThrowIfNull(request.Email);
 
-        CheckClaims(claimsHelper, out string? authUserId, out string? emailClaim);
+        claimsHelper.CheckClaims(out string? authUserId, out string? emailClaim);
 
         if (emailClaim != request.Email)
         {
@@ -50,7 +50,7 @@ public class UserService(
 
     public async Task<User?> GetUser(Expression<Func<User, bool>> expression, CancellationToken cancellationToken)
     {
-        CheckClaims(claimsHelper, out string? _, out _);
+        claimsHelper.CheckClaims(out _, out _);
         var user = await userRepository.GetUser(expression, cancellationToken);
 
         return user; ;
@@ -59,23 +59,12 @@ public class UserService(
     public async Task UpdateUser(User user, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(user);
-        CheckClaims(claimsHelper, out string? authUserId, out string? emailClaim);
+        claimsHelper.CheckClaims(out string? authUserId, out string? emailClaim);
         if (!Information.AdminUsers.Contains(emailClaim) && user.AuthUserId != authUserId)
         {
             throw new InvalidOperationException("User does not have permission to update this user");
         }
 
         await userRepository.Update(user, cancellationToken);
-    }
-
-    private static void CheckClaims(IClaimsHelper claimsHelper, out string? authUserId, out string? emailClaim)
-    {
-        var claims = claimsHelper.RetrieveClaims() ?? throw new Exception("Claims are required.");
-        authUserId = claims.SingleOrDefault(claim => claim.Type == ClaimType.Sub)?.Value;
-        if (string.IsNullOrWhiteSpace(authUserId))
-            throw new InvalidClaimException(ClaimType.Sub);
-        emailClaim = claims.SingleOrDefault(claim => claim.Type == ClaimType.Email)?.Value;
-        if (string.IsNullOrWhiteSpace(emailClaim))
-            throw new InvalidClaimException(ClaimType.Email);
     }
 }

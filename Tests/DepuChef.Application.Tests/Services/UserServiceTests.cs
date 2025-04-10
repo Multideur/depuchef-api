@@ -16,29 +16,11 @@ public class UserServiceTests
     private readonly Mock<IClaimsHelper> _mockClaimsHelper = new();
 
     [Fact]
-    public async Task GetUserById_WhenClaimsAreInvalid_Throw()
-    {
-        var userId = Guid.NewGuid();
-        var sut = CreateSut();
-        var user = new User
-        {
-            Id = userId,
-            ChefPreference = ChefChoice.Femi,
-            SubscriptionLevel = SubscriptionLevel.Free
-        };
-
-        _mockUserRepository.Setup(x => x.GetUser(userId, default)).ReturnsAsync(user);
-
-        var act = () => sut.GetUser(u => u.Id == userId, default);
-
-        await act.Should().ThrowAsync<InvalidClaimException>();
-    }
-
-    [Fact]
-    public async Task GetUserById_WhenClaimsAreValid_ReturnsUser()
+    public async Task GetUser_WhenClaimsAreValid_ReturnsUser()
     {
         // Arrange
         var userId = Guid.NewGuid();
+        var subClaim = "test auth id";
         var sut = CreateSut();
         var email = "test@test.com";
         var user = new User
@@ -48,36 +30,12 @@ public class UserServiceTests
             SubscriptionLevel = SubscriptionLevel.Free
         };
         _mockUserRepository.Setup(x => x.GetUser(u => u.Id == userId, default)).ReturnsAsync(user);
-
-        var claims = new List<Claim>
-        {
-            new(ClaimType.Email, email),
-            new(ClaimType.Sub, userId.ToString())
-        };
-        _mockClaimsHelper.Setup(x => x.RetrieveClaims(null)).Returns(claims);
+        _mockClaimsHelper.Setup(x => x.CheckClaims(out subClaim, out email));
 
         var result = await sut.GetUser(u => u.Id == userId, default);
 
         result.Should().Be(user);
-    }
-
-    [Fact]
-    public async Task RegisterUser_WhenClaimsAreInvalid_Throw()
-    {
-        var sut = CreateSut();
-        var userId = Guid.NewGuid();
-        var request = new RegisterUserRequest
-        {
-            Email = "test@test.com",
-            FirstName = "Test",
-            LastName = "User",
-            Subscription = SubscriptionLevel.Free,
-            ChefPreference = ChefChoice.Femi
-        };
-
-        var act = () => sut.RegisterUser(request, default);
-
-        await act.Should().ThrowAsync<InvalidClaimException>();
+        _mockClaimsHelper.Verify(x => x.CheckClaims(out subClaim, out email), Times.Once);
     }
 
     [Fact]
@@ -86,6 +44,7 @@ public class UserServiceTests
         // Arrange
         var sut = CreateSut();
         var userId = Guid.NewGuid();
+        var subClaim = "test auth id";
         var email = "test@test.com";
         var request = new RegisterUserRequest
         {
@@ -96,12 +55,7 @@ public class UserServiceTests
             ChefPreference = ChefChoice.Femi
         };
 
-        var claims = new List<Claim>
-        {
-            new(ClaimType.Email, email),
-            new(ClaimType.Sub, userId.ToString())
-        };
-        _mockClaimsHelper.Setup(x => x.RetrieveClaims(null)).Returns(claims);
+        _mockClaimsHelper.Setup(x => x.CheckClaims(out subClaim, out email));
 
         var user = new User
         {
@@ -121,10 +75,11 @@ public class UserServiceTests
     }
 
     [Fact]
-    public async Task RegisterUser_WhenUserAlreadyExistsWithDifferentId_ReturnsExistingUser()
+    public async Task RegisterUser_WhenUserAlreadyExists_Throw()
     {
         var sut = CreateSut();
         var userId = Guid.NewGuid();
+        var authUserId = "test auth id";
         var email = "test@test.com";
         var request = new RegisterUserRequest
         {
@@ -135,12 +90,7 @@ public class UserServiceTests
             ChefPreference = ChefChoice.Femi
         };
 
-        var claims = new List<Claim>
-        {
-            new(ClaimType.Email, email),
-            new(ClaimType.Sub, "authUserId")
-        };
-        _mockClaimsHelper.Setup(x => x.RetrieveClaims(null)).Returns(claims);
+        _mockClaimsHelper.Setup(x => x.CheckClaims(out authUserId, out email));
 
         var user = new User
         {
@@ -175,12 +125,7 @@ public class UserServiceTests
             ChefPreference = ChefChoice.Femi
         };
 
-        var claims = new List<Claim>
-        {
-            new(ClaimType.Email, email),
-            new(ClaimType.Sub, authUserId)
-        };
-        _mockClaimsHelper.Setup(x => x.RetrieveClaims(null)).Returns(claims);
+        _mockClaimsHelper.Setup(x => x.CheckClaims(out authUserId, out email));
 
         var user = new User
         {
@@ -206,6 +151,7 @@ public class UserServiceTests
         var sut = CreateSut();
         var userId = Guid.NewGuid();
         var authUserId = "test auth id";
+        var differentAuthUserId = "test auth id different";
         var email = "test@test.com";
         var user = new User
         {
@@ -217,12 +163,7 @@ public class UserServiceTests
             ChefPreference = ChefChoice.Femi
         };
 
-        var claims = new List<Claim>
-        {
-            new(ClaimType.Email, email),
-            new(ClaimType.Sub, "different auth id")
-        };
-        _mockClaimsHelper.Setup(x => x.RetrieveClaims(null)).Returns(claims);
+        _mockClaimsHelper.Setup(x => x.CheckClaims(out differentAuthUserId, out email));
 
         var act = () => sut.UpdateUser(user, default);
 
@@ -246,12 +187,7 @@ public class UserServiceTests
             ChefPreference = ChefChoice.Femi
         };
 
-        var claims = new List<Claim>
-        {
-            new(ClaimType.Email, email),
-            new(ClaimType.Sub, authUserId)
-        };
-        _mockClaimsHelper.Setup(x => x.RetrieveClaims(null)).Returns(claims);
+        _mockClaimsHelper.Setup(x => x.CheckClaims(out authUserId, out email));
 
         await sut.UpdateUser(user, default);
 
