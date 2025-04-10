@@ -1,3 +1,4 @@
+using Azure.Monitor.OpenTelemetry.AspNetCore;
 using DepuChef.Api.Extensions;
 using DepuChef.Api.Middleware;
 using DepuChef.Api.Policies;
@@ -157,6 +158,11 @@ services.AddSwaggerGen(c =>
             []
         }
     });
+});
+
+services.AddOpenTelemetry().UseAzureMonitor(options =>
+{
+    options.SamplingRatio = 0.0F; // no sampling
 });
 
 var app = builder.Build();
