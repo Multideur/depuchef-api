@@ -16,21 +16,21 @@ public static class UserEndpoints
     {
         var userRoute = app.MapGroup("/user");
         userRoute.MapPost("/register", RegisterUser)
+            .RequireAuthorization()
             .Produces<UserResponse>()
-            .ProducesValidationProblem()
-            .RequireAuthorization();
+            .ProducesValidationProblem();
 
         userRoute.MapPut("/{id}", UpdateUser)
-            .Produces<UserResponse>()
-            .RequireAuthorization();
+            .RequireAuthorization()
+            .Produces<UserResponse>();
 
         userRoute.MapGet("", GetUser)
-            .Produces<UserResponse>()
-            .RequireAuthorization();
+            .RequireAuthorization()
+            .Produces<UserResponse>();
 
         userRoute.MapGet("/{userId}/recipe", GetUserRecipes)
-            .Produces<List<RecipeResponse>>()
-            .RequireAuthorization();
+            .RequireAuthorization()
+            .Produces<List<RecipeResponse>>();
 
         userRoute.MapPatch("/{userId}/recipe/{recipeId}", UpdateUserRecipeFavourite)
             .RequireAuthorization();

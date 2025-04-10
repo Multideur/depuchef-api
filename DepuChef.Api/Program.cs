@@ -162,10 +162,12 @@ services.AddSwaggerGen(c =>
     });
 });
 
+#if !DEBUG
 services.AddOpenTelemetry().UseAzureMonitor(options =>
 {
     options.SamplingRatio = 0.0F; // no sampling
 });
+#endif
 
 var app = builder.Build();
 
