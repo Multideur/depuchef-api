@@ -32,6 +32,8 @@ builder.Logging.AddSentry();
 
 var services = builder.Services;
 
+services.AddHttpLogging();
+
 // Register Validators
 services.AddValidatorsFromAssemblyContaining<RegisterUserRequestValidator>();
 
@@ -166,6 +168,8 @@ services.AddOpenTelemetry().UseAzureMonitor(options =>
 });
 
 var app = builder.Build();
+
+app.UseHttpLogging();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
