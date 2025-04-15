@@ -48,6 +48,7 @@ jobs:
       matrix:
         environment:
           - development
+          - production/europe   
     runs-on: ubuntu-latest
     environment: 
       name: ${{ matrix.environment }} 
