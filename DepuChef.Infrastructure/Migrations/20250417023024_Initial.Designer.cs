@@ -12,15 +12,15 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DepuChef.Infrastructure.Migrations
 {
     [DbContext(typeof(DepuChefDbContext))]
-    [Migration("20250401000356_SchemaChanges")]
-    partial class SchemaChanges
+    [Migration("20250417023024_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.3")
+                .HasAnnotation("ProductVersion", "9.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -234,11 +234,32 @@ namespace DepuChef.Infrastructure.Migrations
                     b.ToTable("RecipeProcesses");
                 });
 
+            modelBuilder.Entity("DepuChef.Application.Models.User.AdminUser", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AdminUsers");
+                });
+
             modelBuilder.Entity("DepuChef.Application.Models.User.User", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("ArchivedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ArchivedBy")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("AuthUserId")
                         .HasColumnType("nvarchar(max)");
@@ -257,6 +278,9 @@ namespace DepuChef.Infrastructure.Migrations
 
                     b.Property<string>("FirstName")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("bit");
 
                     b.Property<string>("LastName")
                         .HasColumnType("nvarchar(max)");

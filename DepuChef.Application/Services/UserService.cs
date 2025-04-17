@@ -8,7 +8,8 @@ using System.Linq.Expressions;
 namespace DepuChef.Application.Services;
 
 public class UserService(
-    IUserRepository userRepository, 
+    IUserRepository userRepository,
+    IAdminUserRepository adminUserRepository,
     IClaimsHelper claimsHelper
     ) : IUserService
 {
@@ -42,6 +43,7 @@ public class UserService(
             Email = request.Email,
             FirstName = request.FirstName,
             LastName = request.LastName,
+            VirtualCoins = 150,
             SubscriptionLevel = SubscriptionLevel.FromValue(request.Subscription, SubscriptionLevel.Free)
         };
 
@@ -59,12 +61,38 @@ public class UserService(
     public async Task UpdateUser(User user, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(user);
-        claimsHelper.CheckClaims(out string? authUserId, out string? emailClaim);
-        if (!Information.AdminUsers.Contains(emailClaim) && user.AuthUserId != authUserId)
+        claimsHelper.CheckClaims(out string? authUserId, out _);
+
+        var userIsAdmin = await IsAdmin(cancellationToken);
+        if (!userIsAdmin && user.AuthUserId != authUserId)
         {
             throw new InvalidOperationException("User does not have permission to update this user");
         }
 
         await userRepository.Update(user, cancellationToken);
+    }
+
+    public async Task ArchiveUser(User user, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(user);
+        claimsHelper.CheckClaims(out string? authUserId, out _);
+
+        var userIsAdmin = await IsAdmin(cancellationToken);
+        if (!userIsAdmin && user.AuthUserId != authUserId)
+        {
+            throw new InvalidOperationException("User does not have permission to archive this user");
+        }
+
+        user.IsArchived = true;
+        user.ArchivedAt = DateTime.UtcNow;
+        user.ArchivedBy = authUserId;
+        await userRepository.Update(user, cancellationToken);
+    }
+
+    public async Task<bool> IsAdmin(CancellationToken cancellationToken)
+    {
+        claimsHelper.CheckClaims(out _, out string? emailClaim);
+        var user = await adminUserRepository.Get(a => a.Email == emailClaim, cancellationToken);
+        return user != null;
     }
 }

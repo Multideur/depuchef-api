@@ -8,4 +8,6 @@ public interface IUserService
     Task<User?> RegisterUser(RegisterUserRequest request, CancellationToken cancellationToken);
     Task<User?> GetUser(Expression<Func<User, bool>> expression, CancellationToken cancellationToken);
     Task UpdateUser(User user, CancellationToken cancellationToken);
+    Task ArchiveUser(User user, CancellationToken cancellationToken);
+    Task<bool> IsAdmin(CancellationToken cancellationToken);
 }

@@ -9,4 +9,5 @@ public interface IUserRepository
     Task<User?> GetUser(Expression<Func<User, bool>> expression, CancellationToken cancellationToken);
     Task<User?> GetUser(Guid id, CancellationToken cancellationToken);
     Task Update(User user, CancellationToken cancellationToken);
+    Task Delete(Guid id, CancellationToken cancellationToken);
 }

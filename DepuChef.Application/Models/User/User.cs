@@ -13,4 +13,7 @@ public class User : AuditedModel
     public ICollection<Recipe>? Recipes { get; set; }
     public required SubscriptionLevel SubscriptionLevel { get; set; }
     public required ChefChoice ChefPreference { get; set; }
+    public bool IsArchived { get; set; }
+    public DateTime? ArchivedAt { get; set; }
+    public string? ArchivedBy { get; set; }
 }

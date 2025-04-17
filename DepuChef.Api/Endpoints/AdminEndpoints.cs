@@ -27,16 +27,15 @@ public static class AdminEndpoints
         CancellationToken cancellationToken)
     {
         logger.LogInformation("Adding coins to user.");
-
-        CheckClaims(claimsHelper, out string? _, out string? emailClaim);
-
-        if (!Information.AdminUsers.Contains(emailClaim))
+        
+        var isAdminUser = await userService.IsAdmin(cancellationToken);
+        if (!isAdminUser)
         {
-            logger.LogWarning($"User not authorized to add coins: {{{LogToken.Email}}}", emailClaim);
+            logger.LogWarning($"User not authorized to add coins");
             return Results.Unauthorized();
         }
 
-        var user = await userService.GetUser(u => u.Id == request.UserId, cancellationToken);
+        var user = await userService.GetUser(u => !u.IsArchived && u.Id == request.UserId, cancellationToken);
         if (user == null)
         {
             logger.LogWarning($"User not found with Id: {{{LogToken.UserId}}}", request.UserId);

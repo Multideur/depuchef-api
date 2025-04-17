@@ -20,10 +20,6 @@ public static class UserEndpoints
             .Produces<UserResponse>()
             .ProducesValidationProblem();
 
-        userRoute.MapPut("/{id}", UpdateUser)
-            .RequireAuthorization()
-            .Produces<UserResponse>();
-
         userRoute.MapGet("", GetUser)
             .RequireAuthorization()
             .Produces<UserResponse>();
@@ -31,6 +27,13 @@ public static class UserEndpoints
         userRoute.MapGet("/{userId}/recipe", GetUserRecipes)
             .RequireAuthorization()
             .Produces<List<RecipeResponse>>();
+
+        userRoute.MapPut("/{userId}", UpdateUser)
+            .RequireAuthorization()
+            .Produces<UserResponse>();
+
+        userRoute.MapDelete("/{userId}", ArchiveUser)
+            .RequireAuthorization();
 
         userRoute.MapPatch("/{userId}/recipe/{recipeId}", UpdateUserRecipeFavourite)
             .RequireAuthorization();
@@ -104,13 +107,13 @@ public static class UserEndpoints
     }
 
     private static async Task<IResult> UpdateUser(
-        Guid id,
+        Guid userId,
         [FromBody] UpdateUserRequest request,
         IUserService userService,
         ILogger<UpdateUserRequest> logger,
         CancellationToken cancellationToken)
     {
-        var user = await userService.GetUser(u => u.Id == id, cancellationToken);
+        var user = await userService.GetUser(u => !u.IsArchived && u.Id == userId, cancellationToken);
         if (user == null)
         {
             return Results.NotFound();
@@ -131,8 +134,7 @@ public static class UserEndpoints
         CancellationToken cancellationToken)
     {
         claimsHelper.CheckClaims(out _, out var email);
-        var user = await userService.GetUser(u => u.Email == email,
-            cancellationToken);
+        var user = await userService.GetUser(u => !u.IsArchived && u.Email == email, cancellationToken);
         if (user == null)
         {
             return Results.NotFound();
@@ -156,7 +158,7 @@ public static class UserEndpoints
          IRecipeService recipeService,
          CancellationToken cancellationToken)
     {
-        var user = await userService.GetUser(u => u.Id == userId, cancellationToken);
+        var user = await userService.GetUser(u => !u.IsArchived && u.Id == userId, cancellationToken);
         if (user == null)
         {
             return Results.NotFound();
@@ -227,5 +229,19 @@ public static class UserEndpoints
             return Results.NotFound();
         }
         return Results.Ok();
+    }
+
+    private static async Task<IResult> ArchiveUser(
+        Guid userId,
+        IUserService userService,
+        CancellationToken cancellationToken)
+    {
+        var user = await userService.GetUser(u => !u.IsArchived && u.Id == userId, cancellationToken);
+        if (user == null)
+        {
+            return Results.NotFound();
+        }
+        await userService.ArchiveUser(user, cancellationToken);
+        return Results.NoContent();
     }
 }

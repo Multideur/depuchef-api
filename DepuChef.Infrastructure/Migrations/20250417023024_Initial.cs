@@ -12,24 +12,15 @@ namespace DepuChef.Infrastructure.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Recipe",
+                name: "AdminUsers",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PrepTime = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CookTime = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    TotalTime = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Servings = table.Column<int>(type: "int", nullable: false),
-                    Confidence = table.Column<decimal>(type: "decimal(4,3)", precision: 4, scale: 3, nullable: false),
-                    Rating = table.Column<int>(type: "int", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "(GETUTCDATE())"),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "(GETUTCDATE())")
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Recipe", x => x.Id);
+                    table.PrimaryKey("PK_AdminUsers", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -37,8 +28,9 @@ namespace DepuChef.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ThreadId = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    FileId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FileId = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "(GETUTCDATE())"),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "(GETUTCDATE())")
                 },
@@ -56,8 +48,12 @@ namespace DepuChef.Infrastructure.Migrations
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     FirstName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    VirtualCoins = table.Column<int>(type: "int", nullable: false),
                     SubscriptionLevel = table.Column<int>(type: "int", nullable: false),
                     ChefPreference = table.Column<int>(type: "int", nullable: false),
+                    IsArchived = table.Column<bool>(type: "bit", nullable: false),
+                    ArchivedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ArchivedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "(GETUTCDATE())"),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "(GETUTCDATE())")
                 },
@@ -67,20 +63,53 @@ namespace DepuChef.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Recipes",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Calories = table.Column<int>(type: "int", nullable: true),
+                    CaloriesAfterSubstitution = table.Column<int>(type: "int", nullable: false),
+                    PrepTime = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CookTime = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    TotalTime = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Servings = table.Column<int>(type: "int", nullable: false),
+                    Confidence = table.Column<decimal>(type: "decimal(4,3)", precision: 4, scale: 3, nullable: false),
+                    Rating = table.Column<int>(type: "int", nullable: true),
+                    IsFavourite = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "(GETUTCDATE())"),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "(GETUTCDATE())")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Recipes", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Recipes_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Ingredient",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     RecipeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Category = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Category = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Calories = table.Column<int>(type: "int", nullable: true),
+                    CaloriesAfterSubstitution = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Ingredient", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Ingredient_Recipe_RecipeId",
+                        name: "FK_Ingredient_Recipes_RecipeId",
                         column: x => x.RecipeId,
-                        principalTable: "Recipe",
+                        principalTable: "Recipes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -98,9 +127,9 @@ namespace DepuChef.Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_Instruction", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Instruction_Recipe_RecipeId",
+                        name: "FK_Instruction_Recipes_RecipeId",
                         column: x => x.RecipeId,
-                        principalTable: "Recipe",
+                        principalTable: "Recipes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -117,10 +146,30 @@ namespace DepuChef.Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_Note", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Note_Recipe_RecipeId",
+                        name: "FK_Note_Recipes_RecipeId",
                         column: x => x.RecipeId,
-                        principalTable: "Recipe",
+                        principalTable: "Recipes",
                         principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "HealthySubstitution",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    IngredientId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Original = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Substitute = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_HealthySubstitution", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_HealthySubstitution_Ingredient_IngredientId",
+                        column: x => x.IngredientId,
+                        principalTable: "Ingredient",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -129,7 +178,8 @@ namespace DepuChef.Infrastructure.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     IngredientId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Calories = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -141,6 +191,11 @@ namespace DepuChef.Infrastructure.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_HealthySubstitution_IngredientId",
+                table: "HealthySubstitution",
+                column: "IngredientId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Ingredient_RecipeId",
@@ -161,11 +216,22 @@ namespace DepuChef.Infrastructure.Migrations
                 name: "IX_Note_RecipeId",
                 table: "Note",
                 column: "RecipeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Recipes_UserId",
+                table: "Recipes",
+                column: "UserId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "AdminUsers");
+
+            migrationBuilder.DropTable(
+                name: "HealthySubstitution");
+
             migrationBuilder.DropTable(
                 name: "IngredientItem");
 
@@ -179,13 +245,13 @@ namespace DepuChef.Infrastructure.Migrations
                 name: "RecipeProcesses");
 
             migrationBuilder.DropTable(
-                name: "Users");
-
-            migrationBuilder.DropTable(
                 name: "Ingredient");
 
             migrationBuilder.DropTable(
-                name: "Recipe");
+                name: "Recipes");
+
+            migrationBuilder.DropTable(
+                name: "Users");
         }
     }
 }

@@ -11,6 +11,7 @@ public class DepuChefDbContext(DbContextOptions<DepuChefDbContext> options) : Db
     public DbSet<User> Users { get; set; } = null!;
     public DbSet<RecipeProcess> RecipeProcesses { get; set; } = null!;
     public DbSet<Recipe> Recipes { get; set; } = null!;
+    public DbSet<AdminUser> AdminUsers { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

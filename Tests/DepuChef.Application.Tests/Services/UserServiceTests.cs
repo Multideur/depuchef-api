@@ -1,18 +1,18 @@
 ﻿using DepuChef.Application.Constants;
-using DepuChef.Application.Exceptions;
 using DepuChef.Application.Models.User;
 using DepuChef.Application.Repositories;
 using DepuChef.Application.Services;
 using DepuChef.Application.Utilities;
 using FluentAssertions;
+using FluentAssertions.Execution;
 using Moq;
-using System.Security.Claims;
 
 namespace DepuChef.Application.Tests.Services;
 
 public class UserServiceTests
 {
     private readonly Mock<IUserRepository> _mockUserRepository = new();
+    private readonly Mock<IAdminUserRepository> _mockAdminUserRepository = new();
     private readonly Mock<IClaimsHelper> _mockClaimsHelper = new();
 
     [Fact]
@@ -194,5 +194,40 @@ public class UserServiceTests
         _mockUserRepository.Verify(x => x.Update(user, default), Times.Once);
     }
 
-    private UserService CreateSut() => new(_mockUserRepository.Object, _mockClaimsHelper.Object);
+    [Fact]
+    public async Task ArchiveUser_WhenUserFound_Archives()
+    {
+        var sut = CreateSut();
+        var userId = Guid.NewGuid();
+        var authUserId = "test auth id";
+        var email = "test@test.com";
+        var user = new User
+        {
+            Id = userId,
+            AuthUserId = authUserId,
+            FirstName = "Test",
+            LastName = "User",
+            SubscriptionLevel = SubscriptionLevel.Free,
+            ChefPreference = ChefChoice.Femi,
+            IsArchived = false
+        };
+
+        _mockClaimsHelper.Setup(x => x.CheckClaims(out authUserId, out email));
+        _mockUserRepository.Setup(x => x.GetUser(u => u.Id == userId, default)).ReturnsAsync(user);
+
+        await sut.ArchiveUser(user, default);
+
+        _mockUserRepository.Verify(x => x.Update(user, default), Times.Once);
+        using var _ = new AssertionScope();
+        user.IsArchived.Should().BeTrue();
+        user.ArchivedAt.Should().NotBeNull();
+        user.ArchivedBy.Should().Be(authUserId);
+    }
+
+    private UserService CreateSut() => 
+        new(
+            _mockUserRepository.Object, 
+            _mockAdminUserRepository.Object,
+            _mockClaimsHelper.Object
+            );
 }

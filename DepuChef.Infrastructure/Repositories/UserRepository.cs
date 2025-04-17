@@ -26,4 +26,14 @@ public class UserRepository(DepuChefDbContext databaseContext) : IUserRepository
         databaseContext.Users.Update(user);
         await databaseContext.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task Delete(Guid id, CancellationToken cancellationToken)
+    {
+        var user = await GetUser(id, cancellationToken);
+        if (user != null)
+        {
+            databaseContext.Users.Remove(user);
+            await databaseContext.SaveChangesAsync(cancellationToken);
+        }
+    }
 }

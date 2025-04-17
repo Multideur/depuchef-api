@@ -23,5 +23,6 @@ public static class ServiceCollectionExtensions
         services
             .AddScoped<IRecipeRepository, RecipeRepository>()
             .AddScoped<IUserRepository, UserRepository>()
+            .AddScoped<IAdminUserRepository, AdminUserRepository>()
             .AddScoped<IProcessRepository, ProcessRepository>();
 }

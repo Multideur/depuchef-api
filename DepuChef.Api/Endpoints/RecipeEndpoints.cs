@@ -44,7 +44,7 @@ public static class RecipeEndpoints
             return Results.ValidationProblem(validationErrors);
         }
 
-        var user = await userService.GetUser(u => u.Id == recipeRequest.UserId, cancellationToken);
+        var user = await userService.GetUser(u => !u.IsArchived && u.Id == recipeRequest.UserId, cancellationToken);
 
         if (user == null)
         {
