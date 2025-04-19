@@ -39,7 +39,7 @@ public class Auth0Management(
         {
             ClientId = _options.ClientId,
             ClientSecret = _options.ClientSecret,
-            Audience = _options.Audience,
+            Audience = _options.ManagementAudience,
             GrantType = "client_credentials"
         };
         var content = new StringContent(JsonSerializer.Serialize(request, _jsonSerializerOptions),
