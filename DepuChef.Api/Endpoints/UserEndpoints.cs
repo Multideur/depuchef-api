@@ -32,7 +32,7 @@ public static class UserEndpoints
             .RequireAuthorization()
             .Produces<UserResponse>();
 
-        userRoute.MapDelete("/{userId}", ArchiveUser)
+        userRoute.MapDelete("/{userId}", DeleteUser)
             .RequireAuthorization();
 
         userRoute.MapPatch("/{userId}/recipe/{recipeId}", UpdateUserRecipeFavourite)
@@ -231,17 +231,13 @@ public static class UserEndpoints
         return Results.Ok();
     }
 
-    private static async Task<IResult> ArchiveUser(
+    private static async Task<IResult> DeleteUser(
         Guid userId,
         IUserService userService,
         CancellationToken cancellationToken)
     {
-        var user = await userService.GetUser(u => !u.IsArchived && u.Id == userId, cancellationToken);
-        if (user == null)
-        {
-            return Results.NotFound();
-        }
-        await userService.ArchiveUser(user, cancellationToken);
+        await userService.DeleteUser(userId, cancellationToken);
+
         return Results.NoContent();
     }
 }
