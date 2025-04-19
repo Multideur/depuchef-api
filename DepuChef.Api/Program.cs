@@ -1,10 +1,10 @@
-using Azure.Monitor.OpenTelemetry.AspNetCore;
 using DepuChef.Api.Extensions;
 using DepuChef.Api.Middleware;
 using DepuChef.Api.Policies;
 using DepuChef.Api.Validators;
 using DepuChef.Application;
 using DepuChef.Application.Models;
+using DepuChef.Application.Models.Auth;
 using DepuChef.Application.Models.OpenAI;
 using DepuChef.Application.Services;
 using DepuChef.Application.Services.OpenAi;
@@ -12,6 +12,7 @@ using DepuChef.Application.Utilities;
 using DepuChef.Infrastructure;
 using DepuChef.Infrastructure.Hubs;
 using DepuChef.Infrastructure.Services;
+using DepuChef.Infrastructure.Services.Auth0;
 using DepuChef.Infrastructure.Services.OpenAi;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -49,6 +50,7 @@ services.AddScoped<IClientNotifier, ClientNotifier>();
 services.AddScoped<IJsonFileReader, JsonFileReader>();
 services.AddScoped<IClaimsHelper, ClaimsHelper>();
 services.AddScoped<IStorageService, AzureStorageService>();
+services.AddScoped<IAuthManagementService, Auth0Management>();
 services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 services.AddSingleton(Channel.CreateUnbounded<BackgroundRecipeRequest>());
 services.AddSingleton<IRecipeRequestBackgroundService>(provider =>
@@ -64,6 +66,7 @@ services.AddHostedService(provider =>
 var configuration = builder.Configuration;
 services.Configure<OpenAiOptions>(configuration.GetSection(OpenAiOptions.Options));
 services.Configure<StorageOptions>(configuration.GetSection(StorageOptions.Options));
+services.Configure<AuthenticationOptions>(configuration.GetSection(AuthenticationOptions.Options));
 
 services.AddCors(options =>
 {

@@ -10,6 +10,7 @@ namespace DepuChef.Application.Services;
 public class UserService(
     IUserRepository userRepository,
     IAdminUserRepository adminUserRepository,
+    IAuthManagementService authManagementService,
     IClaimsHelper claimsHelper
     ) : IUserService
 {
@@ -87,6 +88,27 @@ public class UserService(
         user.ArchivedAt = DateTime.UtcNow;
         user.ArchivedBy = authUserId;
         await userRepository.Update(user, cancellationToken);
+    }
+
+    public async Task DeleteUser(Guid id, CancellationToken cancellationToken)
+    {
+        claimsHelper.CheckClaims(out string? authUserId, out _);
+        var userIsAdmin = await IsAdmin(cancellationToken);
+        var user = await userRepository.GetUser(u => u.Id == id, cancellationToken) ?? 
+            throw new InvalidOperationException("User not found");
+
+        if (!userIsAdmin && user.AuthUserId != authUserId)
+        {
+            throw new InvalidOperationException("User does not have permission to delete this user");
+        }
+
+        if (user.AuthUserId == null)
+        {
+            throw new InvalidOperationException("User does not have AuthUserId");
+        }
+
+        await userRepository.Delete(id, cancellationToken);
+        await authManagementService.DeleteUser(user.AuthUserId, cancellationToken);
     }
 
     public async Task<bool> IsAdmin(CancellationToken cancellationToken)

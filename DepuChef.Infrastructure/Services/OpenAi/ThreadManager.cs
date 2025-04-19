@@ -18,7 +18,7 @@ public class ThreadManager(IHttpService httpService,
         logger.LogInformation("Creating thread for assistant: {assistantId}", threadRequest.AssistantId);
 
         var content = new StringContent(JsonSerializer.Serialize(threadRequest, _jsonSerializerOptions),
-        Encoding.UTF8,
+            Encoding.UTF8,
             "application/json");
         var threadUrl = $"{_openAiOptions.BaseUrl}/threads";
         var response = await httpService.PostAsync(threadUrl, 
