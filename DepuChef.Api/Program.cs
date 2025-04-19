@@ -1,3 +1,6 @@
+#if !DEBUG
+using Azure.Monitor.OpenTelemetry.AspNetCore;
+#endif
 using DepuChef.Api.Extensions;
 using DepuChef.Api.Middleware;
 using DepuChef.Api.Policies;
