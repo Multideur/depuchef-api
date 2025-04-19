@@ -137,7 +137,12 @@ public static class UserEndpoints
         var user = await userService.GetUser(u => !u.IsArchived && u.Email == email, cancellationToken);
         if (user == null)
         {
-            return Results.NotFound();
+            var problemDetails = new ProblemDetails
+            {
+                Title = "User not found.",
+                Detail = "User does not exist or is archived."
+            };
+            return Results.NotFound(problemDetails);
         }
         var userResponse = new UserResponse
         {
