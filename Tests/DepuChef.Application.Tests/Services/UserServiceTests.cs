@@ -13,6 +13,7 @@ public class UserServiceTests
 {
     private readonly Mock<IUserRepository> _mockUserRepository = new();
     private readonly Mock<IAdminUserRepository> _mockAdminUserRepository = new();
+    private readonly Mock<IAuthManagementService> _mockAuthManagementService = new();
     private readonly Mock<IClaimsHelper> _mockClaimsHelper = new();
 
     [Fact]
@@ -228,6 +229,7 @@ public class UserServiceTests
         new(
             _mockUserRepository.Object, 
             _mockAdminUserRepository.Object,
+            _mockAuthManagementService.Object,
             _mockClaimsHelper.Object
             );
 }
