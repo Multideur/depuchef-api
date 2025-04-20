@@ -5,12 +5,14 @@ using Microsoft.Extensions.Options;
 using System.Text.Json;
 using System.Text;
 using System.Text.Json.Serialization;
+using Microsoft.Extensions.Logging;
 
 namespace DepuChef.Infrastructure.Services.Auth0;
 
 public class Auth0Management(
     IOptions<AuthenticationOptions> options,
-    IHttpService httpService
+    IHttpService httpService,
+    ILogger<Auth0Management> logger
     ) : IAuthManagementService
 {
     private readonly AuthenticationOptions _options = options.Value;
@@ -33,7 +35,7 @@ public class Auth0Management(
         await managementApi.Users.DeleteAsync(authUserId);
     }
 
-    private async Task<TokenResponse?> GetToken(CancellationToken cancellationToken)
+    public async Task<TokenResponse?> GetToken(CancellationToken cancellationToken)
     {
         var request = new TokenRequest
         {
@@ -52,10 +54,15 @@ public class Auth0Management(
             cancellationToken: cancellationToken);
 
         if (!response.IsSuccessStatusCode)
-            throw new Exception("Failed to generate token.");
+        {
+            var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
+            logger.LogError("Failed to get token: {ErrorContent}", errorContent);
+
+            return null;
+        }
 
         var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
 
-        return JsonSerializer.Deserialize<TokenResponse>(responseContent);
+        return JsonSerializer.Deserialize<TokenResponse>(responseContent, _jsonSerializerOptions);
     }
 }
