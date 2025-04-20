@@ -35,7 +35,7 @@ public class Auth0Management(
         await managementApi.Users.DeleteAsync(authUserId);
     }
 
-    public async Task<TokenResponse?> GetToken(CancellationToken cancellationToken)
+    private async Task<TokenResponse?> GetToken(CancellationToken cancellationToken)
     {
         var request = new TokenRequest
         {

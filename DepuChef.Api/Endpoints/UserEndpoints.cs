@@ -48,7 +48,7 @@ public static class UserEndpoints
     {
         try
         {
-            logger.LogInformation($"Registering user with email: {{{LogToken.Email}}}", request.Email);
+            logger.LogInformation($"Registering user.");
 
             var validationResult = await validator.ValidateAsync(request, cancellationToken);
             if (!validationResult.IsValid)

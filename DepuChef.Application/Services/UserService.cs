@@ -3,6 +3,7 @@ using DepuChef.Application.Exceptions;
 using DepuChef.Application.Models.User;
 using DepuChef.Application.Repositories;
 using DepuChef.Application.Utilities;
+using Microsoft.Extensions.Logging;
 using System.Linq.Expressions;
 
 namespace DepuChef.Application.Services;
@@ -11,7 +12,8 @@ public class UserService(
     IUserRepository userRepository,
     IAdminUserRepository adminUserRepository,
     IAuthManagementService authManagementService,
-    IClaimsHelper claimsHelper
+    IClaimsHelper claimsHelper,
+    ILogger<UserService> logger
     ) : IUserService
 {
     public async Task<User?> RegisterUser(RegisterUserRequest request, CancellationToken cancellationToken)
@@ -36,6 +38,8 @@ public class UserService(
 
             return existingUser;
         }
+
+        logger.LogInformation($"Registering new user {{{LogToken.AuthUserId}}}", authUserId);
 
         var user = new User
         {

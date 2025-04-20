@@ -12,4 +12,5 @@ public class LogToken
     public const string ConnectionId = "ConnectionId";
     public const string Email = "Email";
     public const string ClaimType = "ClaimType";
+    public const string AuthUserId = "AuthUserId";
 }
