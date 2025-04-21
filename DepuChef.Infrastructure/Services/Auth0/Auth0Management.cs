@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Text;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
+using DepuChef.Application.Constants;
 
 namespace DepuChef.Infrastructure.Services.Auth0;
 
@@ -32,6 +33,8 @@ public class Auth0Management(
 
         var managementApi = new ManagementApiClient(accessToken, _options.Authority);
         
+        logger.LogInformation($"Deleting auth user: {{{LogToken.AuthUserId}}}.", authUserId);
+
         await managementApi.Users.DeleteAsync(authUserId);
     }
 
