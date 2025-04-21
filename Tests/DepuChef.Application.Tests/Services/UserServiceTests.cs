@@ -5,6 +5,7 @@ using DepuChef.Application.Services;
 using DepuChef.Application.Utilities;
 using FluentAssertions;
 using FluentAssertions.Execution;
+using Microsoft.Extensions.Logging;
 using Moq;
 
 namespace DepuChef.Application.Tests.Services;
@@ -15,6 +16,7 @@ public class UserServiceTests
     private readonly Mock<IAdminUserRepository> _mockAdminUserRepository = new();
     private readonly Mock<IAuthManagementService> _mockAuthManagementService = new();
     private readonly Mock<IClaimsHelper> _mockClaimsHelper = new();
+    private readonly Mock<ILogger<UserService>> _mockLogger = new();
 
     [Fact]
     public async Task GetUser_WhenClaimsAreValid_ReturnsUser()
@@ -230,6 +232,7 @@ public class UserServiceTests
             _mockUserRepository.Object, 
             _mockAdminUserRepository.Object,
             _mockAuthManagementService.Object,
-            _mockClaimsHelper.Object
+            _mockClaimsHelper.Object,
+            _mockLogger.Object
             );
 }
