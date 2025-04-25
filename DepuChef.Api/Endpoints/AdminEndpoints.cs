@@ -17,6 +17,8 @@ public static class AdminEndpoints
             .ProducesValidationProblem()
             .RequireAuthorization()
             .WithName("AddCoins");
+
+        adminRoute.MapDelete("/user/{userId}", DeleteUser);
     }
 
     private static async Task<IResult> AddCoins(
@@ -57,14 +59,19 @@ public static class AdminEndpoints
             });
     }
 
-    private static void CheckClaims(IClaimsHelper claimsHelper, out string? authUserId, out string? emailClaim)
+    private static async Task<IResult> DeleteUser(
+        Guid userId,
+        IUserService userService,
+        CancellationToken cancellationToken)
     {
-        var claims = claimsHelper.RetrieveClaimsFromToken() ?? throw new Exception("Claims are required.");
-        authUserId = claims.SingleOrDefault(claim => claim.Type == ClaimType.Sub)?.Value;
-        if (string.IsNullOrWhiteSpace(authUserId))
-            throw new InvalidClaimException(ClaimType.Sub);
-        emailClaim = claims.SingleOrDefault(claim => claim.Type == ClaimType.Email)?.Value;
-        if (string.IsNullOrWhiteSpace(emailClaim))
-            throw new InvalidClaimException(ClaimType.Email);
+        var isAdminUser = await userService.IsAdmin(cancellationToken);
+        if (!isAdminUser)
+        {
+            return Results.Unauthorized();
+        }
+
+        await userService.DeleteUser(userId, cancellationToken);
+
+        return Results.NoContent();
     }
 }
