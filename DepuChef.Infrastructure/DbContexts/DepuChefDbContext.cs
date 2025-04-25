@@ -19,7 +19,12 @@ public class DepuChefDbContext(DbContextOptions<DepuChefDbContext> options) : Db
         modelBuilder.Entity<User>(user =>
         {
             user.HasKey(user => user.Id);
-            user.HasMany(user => user.Recipes).WithOne();
+            user
+            .HasMany(user => user.Recipes)
+            .WithOne()
+            .HasForeignKey(recipe => recipe.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
             user.Property(user => user.Email).IsRequired();
             user.Property(user => user.SubscriptionLevel)
             .HasConversion(
@@ -55,9 +60,17 @@ public class DepuChefDbContext(DbContextOptions<DepuChefDbContext> options) : Db
             recipe.Property(recipe => recipe.Servings).IsRequired();
             recipe.Property(recipe => recipe.Confidence).HasPrecision(4,3);
             recipe.Property(recipe => recipe.Rating);
-            recipe.HasMany(recipe => recipe.Ingredients).WithOne().IsRequired();
-            recipe.HasMany(recipe => recipe.Instructions).WithOne().IsRequired();
-            recipe.HasMany(recipe => recipe.Notes).WithOne();
+            recipe.HasMany(recipe => recipe.Ingredients)
+                .WithOne()
+                .HasForeignKey(ingredient => ingredient.RecipeId)
+                .IsRequired();
+            recipe.HasMany(recipe => recipe.Instructions)
+                .WithOne()
+                .HasForeignKey(instruction => instruction.RecipeId)
+                .IsRequired();
+            recipe.HasMany(recipe => recipe.Notes)
+                .WithOne()
+                .HasForeignKey(note => note.RecipeId);
 
             recipe.Property(u => u.CreatedAt)
             .HasDefaultValueSql("(GETUTCDATE())")
