@@ -39,7 +39,6 @@ public class DepuChefDbContext(DbContextOptions<DepuChefDbContext> options) : Db
             user.Property(u => u.UpdatedAt)
             .HasDefaultValueSql("(GETUTCDATE())")
             .IsRequired();
-
         });
 
         modelBuilder.Entity<Recipe>(recipe =>
@@ -69,7 +68,6 @@ public class DepuChefDbContext(DbContextOptions<DepuChefDbContext> options) : Db
             recipe.Property(u => u.UpdatedAt)
             .HasDefaultValueSql("(GETUTCDATE())")
             .IsRequired();
-
         });
 
         modelBuilder.Entity<Ingredient>(ingredient =>
@@ -95,7 +93,6 @@ public class DepuChefDbContext(DbContextOptions<DepuChefDbContext> options) : Db
             process.Property(u => u.UpdatedAt)
             .HasDefaultValueSql("(GETUTCDATE())")
             .IsRequired();
-
         });
     }
 }
