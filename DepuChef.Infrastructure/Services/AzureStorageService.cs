@@ -29,20 +29,20 @@ public class AzureStorageService : IStorageService
         var client = GetBlobContainerClient(_options.Value.AccountName!, _options.Value.ContainerName!);
         var blob = client.GetBlobClient(fileName);
         using var stream = new MemoryStream(image);
-        await blob.UploadAsync(stream, cancellationToken);
-
+        await blob.UploadAsync(stream, true, cancellationToken);
+        
         return blob.Uri.AbsoluteUri;
     }
-    public async Task<string> UploadFileFromStream(Stream imageStream, string fileName, CancellationToken cancellationToken)
+    public async Task<string> UploadFileFromStream(Stream fileStream, string fileName, CancellationToken cancellationToken)
     {
-        if (imageStream == null || imageStream.Length == 0)
+        if (fileStream == null || fileStream.Length == 0)
         {
-            throw new ArgumentException("Image stream is empty", nameof(imageStream));
+            throw new ArgumentException("File stream is empty", nameof(fileStream));
         }
 
         var client = GetBlobContainerClient(_options.Value.AccountName!, _options.Value.ContainerName!);
         var blob = client.GetBlobClient(fileName);
-        await blob.UploadAsync(imageStream, cancellationToken);
+        await blob.UploadAsync(fileStream, true, cancellationToken);
 
         return blob.Uri.AbsoluteUri;
     }

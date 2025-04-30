@@ -6,4 +6,5 @@ public class RecipeProcess : AuditedModel
     public Guid UserId { get; set; }
     public required string ThreadId { get; set; }
     public string? FileId { get; set; }
+    public string? RecipeImageUrl { get; set; }
 }

@@ -1,7 +1,6 @@
 ﻿using DepuChef.Application.Constants;
 using DepuChef.Application.Models;
 using DepuChef.Application.Models.OpenAI;
-using DepuChef.Application.Models.OpenAI.CleanUp;
 using DepuChef.Application.Models.OpenAI.File;
 using DepuChef.Application.Models.OpenAI.Thread;
 using DepuChef.Application.Models.User;
@@ -27,6 +26,7 @@ public class OpenAiRecipeServiceTests
     private readonly Mock<IProcessRepository> _mockProcessRepository = new();
     private readonly Mock<IUserRepository> _mockUserRepository = new();
     private readonly Mock<IRecipeRepository> _mockRecipeRepository = new();
+    private readonly Mock<IStorageService> _mockStorageService = new();
     private readonly Mock<IOptions<OpenAiOptions>> _mockOptions = new();
     private readonly Mock<ILogger<OpenAiRecipeService>> _mockLogger = new();
 
@@ -47,7 +47,7 @@ public class OpenAiRecipeServiceTests
         var sut = CreateSut();
         var recipeRequest = new BackgroundRecipeRequest
         {
-            Image = new FormFile(Stream.Null, 0, 0, "fileName", "fileName"),
+            Image = new FormFile(Stream.Null, 0, 0, "fileName", "fileName.jpg"),
             Stream = new MemoryStream(),
             ConnectionId = "connectionId"
         };
@@ -60,7 +60,7 @@ public class OpenAiRecipeServiceTests
             x.UploadFile(
                 It.Is<FileUploadRequest>(request =>
                     request.Purpose == "vision"
-                    && request.File!.FileName == "fileName"),
+                    && request.File!.FileName == "fileName.jpg"),
                 default));
     }
 
@@ -71,7 +71,7 @@ public class OpenAiRecipeServiceTests
         var sut = CreateSut();
         var recipeRequest = new BackgroundRecipeRequest
         {
-            Image = new FormFile(Stream.Null, 0, 0, "fileName", "fileName"),
+            Image = new FormFile(Stream.Null, 0, 0, "fileName", "fileName.jpg"),
             Stream = new MemoryStream(),
             ConnectionId = "connectionId"
         };
@@ -101,7 +101,7 @@ public class OpenAiRecipeServiceTests
         const string threadId = "threadId";
         var recipeRequest = new BackgroundRecipeRequest
         {
-            Image = new FormFile(Stream.Null, 0, 0, "fileName", "fileName"),
+            Image = new FormFile(Stream.Null, 0, 0, "fileName", "fileName.jpg"),
             Stream = new MemoryStream(),
             UserId = Guid.NewGuid(),
             ConnectionId = connectionId
@@ -131,7 +131,7 @@ public class OpenAiRecipeServiceTests
         const string threadId = "threadId";
         var recipeRequest = new BackgroundRecipeRequest
         {
-            Image = new FormFile(Stream.Null, 0, 0, "fileName", "fileName"),
+            Image = new FormFile(Stream.Null, 0, 0, "fileName", "fileName.jpg"),
             Stream = new MemoryStream(),
             UserId = Guid.NewGuid(),
             ConnectionId = connectionId
@@ -183,7 +183,7 @@ public class OpenAiRecipeServiceTests
 
         var recipeRequest = new BackgroundRecipeRequest
         {
-            Image = new FormFile(Stream.Null, 0, 0, "fileName", "fileName"),
+            Image = new FormFile(Stream.Null, 0, 0, "fileName", "fileName.jpg"),
             Stream = new MemoryStream(),
             ConnectionId = connectionId
         };
@@ -235,6 +235,7 @@ public class OpenAiRecipeServiceTests
             _mockProcessRepository.Object,
             _mockUserRepository.Object,
             _mockRecipeRepository.Object,
+            _mockStorageService.Object,
             _mockOptions.Object,
             _mockLogger.Object
             );

@@ -22,6 +22,7 @@ public class OpenAiRecipeService(IFileManager fileManager,
     IProcessRepository processRepository,
     IUserRepository userRepository,
     IRecipeRepository recipeRepository,
+    IStorageService storageService,
     IOptions<OpenAiOptions> options,
     ILogger<OpenAiRecipeService> logger) : IAiRecipeService
 {
@@ -63,12 +64,20 @@ public class OpenAiRecipeService(IFileManager fileManager,
                 Stream = recipeRequest.Stream
             };
 
-            var fileUploadResponse = await UploadFile(fileUploadRequest, cancellationToken);
+            var fileUploadResponse = await UploadFileToModel(fileUploadRequest, cancellationToken);
             if (fileUploadResponse is null || fileUploadResponse.Id is null)
             {
                 logger.LogError("Failed to upload file.");
                 return;
             }
+
+            var imageUrl = await UploadRecipeImageToStorage(
+                recipeRequest.Image.FileName,
+                recipeRequest.UserId.ToString(), 
+                recipeRequest.Stream, 
+                cancellationToken);
+
+            fileUploadRequest.Stream?.Dispose();
 
             logger.LogInformation($"File uploaded successfully with Id: {{{LogToken.FileId}}}", fileUploadResponse.Id);
 
@@ -101,7 +110,8 @@ public class OpenAiRecipeService(IFileManager fileManager,
             {
                 ThreadId = runResponse.ThreadId,
                 FileId = fileUploadResponse.Id,
-                UserId = recipeRequest.UserId
+                UserId = recipeRequest.UserId,
+                RecipeImageUrl = imageUrl
             }, cancellationToken);
 
             if (recipeProcess is null)
@@ -246,6 +256,7 @@ public class OpenAiRecipeService(IFileManager fileManager,
         }
 
         deserializeRecipe.UserId = process.UserId;
+        deserializeRecipe.ImageUrl = process.RecipeImageUrl;
         var savedRecipe = await recipeRepository.Add(deserializeRecipe, cancellationToken);
 
         _ = CleanUp(threadId, cancellationToken);
@@ -304,13 +315,27 @@ public class OpenAiRecipeService(IFileManager fileManager,
             }
         };
 
-    private async Task<FileUploadResponse?> UploadFile(FileUploadRequest fileUploadRequest, CancellationToken cancellationToken = default)
+    private async Task<FileUploadResponse?> UploadFileToModel(FileUploadRequest fileUploadRequest, CancellationToken cancellationToken = default)
     {
         var fileUploadResponse = await fileManager.UploadFile(fileUploadRequest, cancellationToken);
 
-        fileUploadRequest.Stream?.Dispose();
-
         return fileUploadResponse;
+    }
+
+    private async Task<string> UploadRecipeImageToStorage(string fileName, 
+        string userId, 
+        Stream fileStream, 
+        CancellationToken cancellationToken)
+    {
+        var fileNameExtension = Path.GetExtension(fileName);
+        if (string.IsNullOrWhiteSpace(fileNameExtension))
+        {
+            throw new ArgumentException("File name is invalid", nameof(fileName));
+        }
+
+        fileName = "images/recipes/" + userId + $"/{Guid.NewGuid()}{fileNameExtension}";
+        
+        return await storageService.UploadFileFromStream(fileStream, fileName, cancellationToken);
     }
 
     private async Task CleanUp(string threadId,

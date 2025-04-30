@@ -17,4 +17,5 @@ public class RecipeResponse
     public decimal Confidence { get; set; }
     public int? Rating { get; set; }
     public bool IsFavourite { get; set; }
+    public string? ImageUrl { get; set; }
 }

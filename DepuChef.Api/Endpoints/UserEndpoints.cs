@@ -208,7 +208,8 @@ public static class UserEndpoints
             Servings = r.Servings,
             TotalTime = r.TotalTime,
             Calories = r.Calories,
-            CaloriesAfterSubstitution = r.CaloriesAfterSubstitution
+            CaloriesAfterSubstitution = r.CaloriesAfterSubstitution,
+            ImageUrl = r.ImageUrl
         }).ToList();
 
         return Results.Ok(recipeResponses);
