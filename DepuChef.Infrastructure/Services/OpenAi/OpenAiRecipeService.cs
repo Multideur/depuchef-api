@@ -322,7 +322,7 @@ public class OpenAiRecipeService(IFileManager fileManager,
         return fileUploadResponse;
     }
 
-    private async Task<string> UploadRecipeImageToStorage(string fileName, 
+    private async Task<string?> UploadRecipeImageToStorage(string fileName, 
         string userId, 
         Stream fileStream, 
         CancellationToken cancellationToken)
