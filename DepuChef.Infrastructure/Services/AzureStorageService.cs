@@ -38,12 +38,12 @@ public class AzureStorageService : IStorageService
         return blob.Uri.AbsoluteUri;
     }
 
-    public async Task<string> UploadFileFromStream(Stream fileStream, string fileName, CancellationToken cancellationToken)
+    public async Task<string?> UploadFileFromStream(Stream fileStream, string fileName, CancellationToken cancellationToken)
     {
         if (!_options.Value.Enabled)
         {
             _logger.LogWarning("Azure Storage is not enabled. Skipping upload.");
-            return string.Empty;
+            return null;
         }
 
         if (fileStream == null || fileStream.Length == 0)
