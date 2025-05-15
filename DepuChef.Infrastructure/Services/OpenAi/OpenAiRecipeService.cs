@@ -327,15 +327,26 @@ public class OpenAiRecipeService(IFileManager fileManager,
         Stream fileStream, 
         CancellationToken cancellationToken)
     {
-        var fileNameExtension = Path.GetExtension(fileName);
-        if (string.IsNullOrWhiteSpace(fileNameExtension))
+        try
         {
-            throw new ArgumentException("File name is invalid", nameof(fileName));
-        }
+            var fileNameExtension = Path.GetExtension(fileName);
+            if (string.IsNullOrWhiteSpace(fileNameExtension))
+            {
+                throw new ArgumentException("File name is invalid", nameof(fileName));
+            }
 
-        fileName = "images/recipes/" + userId + $"/{Guid.NewGuid()}{fileNameExtension}";
-        
-        return await storageService.UploadFileFromStream(fileStream, fileName, cancellationToken);
+            fileName = "images/recipes/" + userId + $"/{Guid.NewGuid()}{fileNameExtension}";
+
+            return await storageService.UploadFileFromStream(fileStream, fileName, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "There was a problem while trying to upload file {fileName} for user {userId}",
+                fileName,
+                userId);
+
+            return null;
+        }
     }
 
     private async Task CleanUp(string threadId,
