@@ -18,4 +18,5 @@ public class RecipeResponse
     public int? Rating { get; set; }
     public bool IsFavourite { get; set; }
     public string? ImageUrl { get; set; }
+    public DateTime GeneratedAt { get; set; }
 }

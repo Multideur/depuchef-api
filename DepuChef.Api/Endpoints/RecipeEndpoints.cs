@@ -140,7 +140,8 @@ public static class RecipeEndpoints
             TotalTime = recipe.TotalTime,
             Calories = recipe.Calories,
             CaloriesAfterSubstitution = recipe.CaloriesAfterSubstitution,
-            ImageUrl = recipe.ImageUrl
+            ImageUrl = recipe.ImageUrl,
+            GeneratedAt = recipe.CreatedAt
         };
 
         return Results.Ok(recipeResponse);
