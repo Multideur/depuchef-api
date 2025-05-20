@@ -72,6 +72,7 @@ public class OpenAiRecipeService(IFileManager fileManager,
                 return;
             }
 
+            originalStream.Position = 0;    
             var imageUrl = await UploadRecipeImageToStorage(
                 recipeRequest.Image.FileName,
                 recipeRequest.UserId.ToString(),
