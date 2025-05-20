@@ -12,7 +12,7 @@ namespace DepuChef.Api.Validators
                 RuleFor(x => x.Image)
                     .NotEmpty()
                     .WithMessage("Image is required when text is not provided.")
-                    .Must(x => x!.Length <= 5_000_000)
+                    .Must(x => x!.Length <= 50_000_000)
                     .WithMessage("Image is too large.")
                     .Must(x => x!.ContentType.Contains("image"))
                     .WithMessage("File is not an image.");
