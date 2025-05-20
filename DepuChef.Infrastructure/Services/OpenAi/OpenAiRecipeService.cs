@@ -77,8 +77,6 @@ public class OpenAiRecipeService(IFileManager fileManager,
                 recipeRequest.Stream, 
                 cancellationToken);
 
-            fileUploadRequest.Stream?.Dispose();
-
             logger.LogInformation($"File uploaded successfully with Id: {{{LogToken.FileId}}}", fileUploadResponse.Id);
 
             var threadRequest = CreateThreadRequest(fileUploadResponse);
