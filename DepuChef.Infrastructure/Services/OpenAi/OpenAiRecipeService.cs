@@ -56,12 +56,13 @@ public class OpenAiRecipeService(IFileManager fileManager,
 
             var image = recipeRequest.Image;
             logger.LogInformation("Processing image with FileName: {fileName}", image.FileName);
+            (MemoryStream originalStream, MemoryStream fileManagerStream) = await CloneStream(recipeRequest, cancellationToken);
 
             var fileUploadRequest = new FileUploadRequest
             {
                 Purpose = "vision",
                 File = image,
-                Stream = recipeRequest.Stream
+                Stream = fileManagerStream
             };
 
             var fileUploadResponse = await UploadFileToModel(fileUploadRequest, cancellationToken);
@@ -73,8 +74,8 @@ public class OpenAiRecipeService(IFileManager fileManager,
 
             var imageUrl = await UploadRecipeImageToStorage(
                 recipeRequest.Image.FileName,
-                recipeRequest.UserId.ToString(), 
-                recipeRequest.Stream, 
+                recipeRequest.UserId.ToString(),
+                originalStream,
                 cancellationToken);
 
             logger.LogInformation($"File uploaded successfully with Id: {{{LogToken.FileId}}}", fileUploadResponse.Id);
@@ -137,6 +138,16 @@ public class OpenAiRecipeService(IFileManager fileManager,
             logger.LogError(ex, "Failed to create recipe from image");
             throw;
         }
+    }
+
+    private static async Task<(MemoryStream originalStream, MemoryStream fileManagerStream)> CloneStream(BackgroundRecipeRequest recipeRequest, CancellationToken cancellationToken)
+    {
+        var originalStream = recipeRequest.Stream!;
+        originalStream.Position = 0;
+        var fileManagerStream = new MemoryStream();
+        await originalStream.CopyToAsync(fileManagerStream, cancellationToken);
+        fileManagerStream.Position = 0;
+        return (originalStream, fileManagerStream);
     }
 
     public async Task CreateRecipeFromText(BackgroundRecipeRequest recipeRequest, CancellationToken cancellationToken = default)
