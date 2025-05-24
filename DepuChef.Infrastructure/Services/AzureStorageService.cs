@@ -2,6 +2,7 @@
 using Azure.Storage.Blobs;
 using DepuChef.Application;
 using DepuChef.Application.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -23,18 +24,47 @@ public class AzureStorageService : IStorageService
         _logger = logger;
     }
 
-    public async Task<string> UploadFile(byte[] image, string fileName, CancellationToken cancellationToken)
+    public async Task<string> UploadFile(byte[] file, string fileName, CancellationToken cancellationToken)
     {
-        if (image == null || image.Length == 0)
+        if (file == null || file.Length == 0)
         {
-            throw new ArgumentException("Image is empty", nameof(image));
+            throw new ArgumentException("File is empty", nameof(file));
         }
 
         var client = GetBlobContainerClient(_options.Value.AccountName!, _options.Value.ContainerName!);
         var blob = client.GetBlobClient(fileName);
-        using var stream = new MemoryStream(image);
+        using var stream = new MemoryStream(file);
         await blob.UploadAsync(stream, true, cancellationToken);
         
+        return blob.Uri.AbsoluteUri;
+    }
+
+    public async Task<string?> UploadFile(IFormFile file, string fileName, CancellationToken cancellationToken)
+    {
+        if (!_options.Value.Enabled)
+        {
+            _logger.LogWarning("Azure Storage is not enabled. Skipping upload.");
+            return null;
+        }
+        if (file == null || file.Length == 0)
+        {
+            throw new ArgumentException("File is empty", nameof(file));
+        }
+
+        if (string.IsNullOrWhiteSpace(fileName))
+        {
+            throw new ArgumentException("File name is empty", nameof(fileName));
+        }
+
+        if (fileName.Contains(".."))
+        {
+            throw new ArgumentException("File name cannot contain '..'", nameof(fileName));
+        }
+
+        var client = GetBlobContainerClient(_options.Value.AccountName!, _options.Value.ContainerName!);
+        var blob = client.GetBlobClient(fileName);
+        using var stream = file.OpenReadStream();
+        await blob.UploadAsync(stream, true, cancellationToken);
         return blob.Uri.AbsoluteUri;
     }
 

@@ -11,4 +11,5 @@ public class UserResponse
     public int VirtualCoins { get; set; }
     public SubscriptionLevel? SubscriptionLevel { get; set; }
     public ChefChoice? ChefPreference { get; set; }
+    public string? ProfilePictureUrl { get; set; }
 }

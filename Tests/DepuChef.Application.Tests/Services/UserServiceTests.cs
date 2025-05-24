@@ -5,6 +5,7 @@ using DepuChef.Application.Services;
 using DepuChef.Application.Utilities;
 using FluentAssertions;
 using FluentAssertions.Execution;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Moq;
 
@@ -16,6 +17,7 @@ public class UserServiceTests
     private readonly Mock<IAdminUserRepository> _mockAdminUserRepository = new();
     private readonly Mock<IAuthManagementService> _mockAuthManagementService = new();
     private readonly Mock<IClaimsHelper> _mockClaimsHelper = new();
+    private readonly Mock<IStorageService> _mockStorageService = new();
     private readonly Mock<ILogger<UserService>> _mockLogger = new();
 
     [Fact]
@@ -198,6 +200,36 @@ public class UserServiceTests
     }
 
     [Fact]
+    public async Task UpdateUserProfilePicture_WhenAuthIdIsSame_UpdateUser()
+    {
+        var sut = CreateSut();
+        var userId = Guid.NewGuid();
+        var authUserId = "test auth id";
+        var email = "test@test.com";
+        var file = new Mock<IFormFile>();
+        var user = new User
+        {
+            Id = userId,
+            AuthUserId = authUserId,
+            FirstName = "Test",
+            LastName = "User",
+            SubscriptionLevel = SubscriptionLevel.Free,
+            ChefPreference = ChefChoice.Femi
+        };
+        var fileName = "test.jpg";
+        var fileNameExtension = Path.GetExtension(fileName);
+        var fileNameWithId = "images/user-profile/" + userId + $"/{Guid.NewGuid()}{fileNameExtension}";
+        file.Setup(x => x.FileName).Returns(fileName);
+        _mockClaimsHelper.Setup(x => x.CheckClaims(out authUserId, out email));
+        _mockUserRepository.Setup(x => x.GetUser(u => u.Id == userId, default)).ReturnsAsync(user);
+        _mockStorageService.Setup(x => x.UploadFile(file.Object, It.Is<string>(s => s.Contains(userId.ToString())), default)).ReturnsAsync(fileNameWithId);
+
+        await sut.UpdateUserProfilePicture(userId, file.Object, default);
+
+        _mockUserRepository.Verify(x => x.Update(user, default), Times.Once);
+    }
+
+    [Fact]
     public async Task ArchiveUser_WhenUserFound_Archives()
     {
         var sut = CreateSut();
@@ -233,6 +265,7 @@ public class UserServiceTests
             _mockAdminUserRepository.Object,
             _mockAuthManagementService.Object,
             _mockClaimsHelper.Object,
+            _mockStorageService.Object,
             _mockLogger.Object
             );
 }

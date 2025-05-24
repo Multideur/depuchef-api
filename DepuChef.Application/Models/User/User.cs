@@ -16,4 +16,5 @@ public class User : AuditedModel
     public bool IsArchived { get; set; }
     public DateTime? ArchivedAt { get; set; }
     public string? ArchivedBy { get; set; }
+    public string? ProfilePictureUrl { get; set; }
 }

@@ -3,6 +3,7 @@ using DepuChef.Application.Exceptions;
 using DepuChef.Application.Models.User;
 using DepuChef.Application.Repositories;
 using DepuChef.Application.Utilities;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System.Linq.Expressions;
 
@@ -13,6 +14,7 @@ public class UserService(
     IAdminUserRepository adminUserRepository,
     IAuthManagementService authManagementService,
     IClaimsHelper claimsHelper,
+    IStorageService storageService,
     ILogger<UserService> logger
     ) : IUserService
 {
@@ -75,6 +77,34 @@ public class UserService(
         }
 
         await userRepository.Update(user, cancellationToken);
+    }
+
+    public async Task UpdateUserProfilePicture(Guid userId, IFormFile file, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(file);
+        ArgumentNullException.ThrowIfNull(file.FileName);
+
+        claimsHelper.CheckClaims(out string? authUserId, out _);
+        var userIsAdmin = await IsAdmin(cancellationToken);
+        var user = await userRepository.GetUser(u => u.Id == userId, cancellationToken) ??
+            throw new InvalidOperationException("User not found");
+        if (!userIsAdmin && user.AuthUserId != authUserId)
+        {
+            throw new InvalidOperationException("User does not have permission to update this user");
+        }
+
+        var fileName = file.FileName;
+        var fileNameExtension = Path.GetExtension(fileName);
+        fileName = "images/user-profile/" + userId + $"/{Guid.NewGuid()}{fileNameExtension}";
+
+        var imageUrl = await storageService.UploadFile(file, fileName, cancellationToken);
+        if (string.IsNullOrWhiteSpace(imageUrl))
+        {
+            throw new InvalidOperationException("Image url is invalid. Failed to upload image");
+        }
+
+        user.ProfilePictureUrl = imageUrl;
+        await UpdateUser(user, cancellationToken);
     }
 
     public async Task ArchiveUser(User user, CancellationToken cancellationToken)

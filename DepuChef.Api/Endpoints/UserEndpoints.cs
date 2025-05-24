@@ -32,6 +32,9 @@ public static class UserEndpoints
             .RequireAuthorization()
             .Produces<UserResponse>();
 
+        userRoute.MapPut("/{userId}/update-profile-picture", UpdateProfilePicture)
+            .RequireAuthorization();
+
         userRoute.MapPatch("/{userId}/recipe/{recipeId}", UpdateUserRecipeFavourite)
             .RequireAuthorization();
     }
@@ -149,7 +152,8 @@ public static class UserEndpoints
             LastName = user.LastName,
             VirtualCoins = user.VirtualCoins,
             SubscriptionLevel = user.SubscriptionLevel,
-            ChefPreference = user.ChefPreference
+            ChefPreference = user.ChefPreference,
+            ProfilePictureUrl = user.ProfilePictureUrl
         };
         return Results.Ok(userResponse);
     }
@@ -233,5 +237,22 @@ public static class UserEndpoints
             return Results.NotFound();
         }
         return Results.Ok();
+    }
+
+    private static async Task<IResult> UpdateProfilePicture(
+        Guid userId,
+        IFormFile file,
+        IUserService userService,
+        CancellationToken cancellationToken)
+    {
+        var user = await userService.GetUser(u => !u.IsArchived && u.Id == userId, cancellationToken);
+        if (user == null)
+        {
+            return Results.NotFound();
+        }
+
+        await userService.UpdateUserProfilePicture(userId, file, cancellationToken);
+
+        return Results.NoContent();
     }
 }
